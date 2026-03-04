@@ -1254,7 +1254,7 @@ function wtApply(budget, rsiThr) {
 }
 
 setTimeout(function(){
-  if(!localStorage.getItem('wt-done')&&!Object.keys(D.stocks).length) wtStart();
+  if(!localStorage.getItem('wt-done')) wtStart();
 },800);
 // ===== WALKTHROUGH END =====
 
