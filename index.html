@@ -1058,6 +1058,11 @@ function pwaBannerClose() {
 // ===== PWA END =====
 
 // ===== WALKTHROUGH JS =====
+// 変更点：
+// 1. バーチャル資金を常に100万円固定
+// 2. 業界を10種類に拡充
+// 3. budget質問を「投資スタイル」に変更（資金は固定のため）
+
 var WT = {
   step: 0,
   ans: {},
@@ -1066,11 +1071,6 @@ var WT = {
      opts:[{icon:'🌱',title:'まったくはじめて',desc:'投資という言葉は知っているけど…という方',val:'none'},
            {icon:'📚',title:'少し勉強したことがある',desc:'本やWebで調べたことはある',val:'some'},
            {icon:'📈',title:'実際に取引したことがある',desc:'証券口座を持ったことがある',val:'exp'}]},
-    {id:'budget', emoji:'💰', q:'月々いくらを投資にまわせそうですか？', sub:'バーチャルトレードの開始資金を決めます。無理のない金額でOK！',
-     opts:[{icon:'🪙',title:'5,000円くらい',desc:'コツコツ積み立てたい',val:5000,yearly:60000},
-           {icon:'💴',title:'1万円くらい',desc:'少額からしっかり学びたい',val:10000,yearly:120000},
-           {icon:'💵',title:'3万円くらい',desc:'ある程度まとめて運用したい',val:30000,yearly:360000},
-           {icon:'💎',title:'5万円以上',desc:'本格的に取り組みたい',val:50000,yearly:600000}]},
     {id:'style', emoji:'🎯', q:'投資スタイルはどちらに近いですか？', sub:'アラート条件の設定に使います。後から変更できます。',
      opts:[{icon:'🌳',title:'じっくり長期保有',desc:'数ヶ月〜1年以上持ち続けたい',val:'long'},
            {icon:'⚡',title:'短期で売買したい',desc:'数日〜数週間で売り買いしたい',val:'short'},
@@ -1079,7 +1079,13 @@ var WT = {
      opts:[{icon:'💻',title:'IT・テクノロジー',desc:'ソフトバンク・ソニーなど',val:'tech'},
            {icon:'🚗',title:'自動車・製造業',desc:'トヨタ・ホンダなど',val:'auto'},
            {icon:'🍺',title:'食品・生活用品',desc:'アサヒ・味の素など',val:'food'},
-           {icon:'🏦',title:'金融・銀行',desc:'三菱UFJ・野村HDなど',val:'finance'}]},
+           {icon:'🏦',title:'金融・銀行',desc:'三菱UFJ・野村HDなど',val:'finance'},
+           {icon:'🏠',title:'不動産・建設',desc:'三井不動産・大和ハウスなど',val:'realty'},
+           {icon:'🏥',title:'医療・ヘルスケア',desc:'武田薬品・エーザイなど',val:'health'},
+           {icon:'⚡',title:'エネルギー・資源',desc:'ENEOS・出光興産など',val:'energy'},
+           {icon:'🛍️',title:'小売・EC',desc:'イオン・Zホールディングスなど',val:'retail'},
+           {icon:'📡',title:'通信・インフラ',desc:'NTT・KDDI・ソフトバンクなど',val:'telecom'},
+           {icon:'🎮',title:'エンタメ・ゲーム',desc:'任天堂・バンナムHDなど',val:'game'}]},
     {id:'goal', emoji:'🏆', q:'投資の目標を教えてください', sub:'あなたに合ったアドバイスをするために使います',
      opts:[{icon:'📈',title:'お金を増やしたい',desc:'資産形成・FIRE・老後の備えなど',val:'grow'},
            {icon:'🎓',title:'株の勉強をしたい',desc:'経済や企業分析を学びたい',val:'learn'},
@@ -1088,8 +1094,14 @@ var WT = {
   STOCKS: {
     tech:[{code:'4755',name:'楽天グループ'},{code:'9984',name:'ソフトバンクG'},{code:'6758',name:'ソニーグループ'},{code:'4689',name:'LINEヤフー'}],
     auto:[{code:'7203',name:'トヨタ自動車'},{code:'7267',name:'ホンダ'},{code:'7269',name:'スズキ'},{code:'6902',name:'デンソー'}],
-    food:[{code:'2914',name:'JT'},{code:'2502',name:'アサヒグループ'},{code:'2802',name:'味の素'},{code:'7974',name:'任天堂'}],
-    finance:[{code:'8306',name:'三菱UFJ'},{code:'8316',name:'三井住友FG'},{code:'8411',name:'みずほFG'},{code:'8604',name:'野村HD'}]
+    food:[{code:'2914',name:'JT'},{code:'2502',name:'アサヒグループ'},{code:'2802',name:'味の素'},{code:'2269',name:'明治HD'}],
+    finance:[{code:'8306',name:'三菱UFJ'},{code:'8316',name:'三井住友FG'},{code:'8411',name:'みずほFG'},{code:'8604',name:'野村HD'}],
+    realty:[{code:'8801',name:'三井不動産'},{code:'8802',name:'三菱地所'},{code:'1925',name:'大和ハウス'},{code:'8830',name:'住友不動産'}],
+    health:[{code:'4502',name:'武田薬品'},{code:'4523',name:'エーザイ'},{code:'4519',name:'中外製薬'},{code:'4568',name:'第一三共'}],
+    energy:[{code:'5019',name:'出光興産'},{code:'5020',name:'ENEOS'},{code:'9531',name:'東京ガス'},{code:'9503',name:'関西電力'}],
+    retail:[{code:'8267',name:'イオン'},{code:'3382',name:'セブン&アイ'},{code:'8小28',name:'ファーストリテイリング'},{code:'4452',name:'花王'}],
+    telecom:[{code:'9432',name:'NTT'},{code:'9433',name:'KDDI'},{code:'9434',name:'ソフトバンク'},{code:'9437',name:'NTTドコモ'}],
+    game:[{code:'7974',name:'任天堂'},{code:'7832',name:'バンダイナムコHD'},{code:'9684',name:'スクウェア・エニックス'},{code:'3765',name:'ガンホー'}]
   }
 };
 
@@ -1174,10 +1186,9 @@ function wtNext() {
 }
 
 function wtShowResult() {
-  var budgetOpt = null;
-  WT.steps[1].opts.forEach(function(o){ if(o.val===WT.ans.budget)budgetOpt=o; });
-  var yearly = budgetOpt ? budgetOpt.yearly : 120000;
-  var monthly = budgetOpt ? budgetOpt.val : 10000;
+  // 資金は常に100万円固定
+  var budget = 1000000;
+  var rsiThr = WT.ans.style==='long' ? 35 : 30;
 
   var sectors = WT.ans.sector || ['tech'];
   if(!sectors.length)sectors=['tech'];
@@ -1187,10 +1198,13 @@ function wtShowResult() {
       if(!recommended.find(function(r){return r.code===s.code;}))recommended.push(s);
     });
   });
-  recommended = recommended.slice(0,5);
+  recommended = recommended.slice(0,6);
 
-  var rsiThr = WT.ans.style==='long' ? 35 : 30;
-  var goalMsg = {grow:'資産を増やすために、買いサインを見逃さないよう監視します',learn:'学習用に幅広い銘柄を監視して、パターンを学びましょう',save:'安定銘柄を中心に、長期目線で監視します'}[WT.ans.goal]||'';
+  var goalMsg = {
+    grow:'資産を増やすために、買いサインを見逃さないよう監視します',
+    learn:'学習用に幅広い銘柄を監視して、パターンを学びましょう',
+    save:'安定銘柄を中心に、長期目線で監視します'
+  }[WT.ans.goal]||'';
 
   var stocksH = '';
   recommended.forEach(function(s){
@@ -1204,11 +1218,11 @@ function wtShowResult() {
   var h = '<div class="wt-step wt-result">';
   h += '<span class="wt-emoji">🎉</span>';
   h += '<div class="wt-result-title">準備完了！</div>';
-  h += '<div class="wt-result-sub">'+goalMsg+'<br>バーチャル資金 <strong style="color:var(--cyan)">'+yearly.toLocaleString()+'円</strong>（月'+monthly.toLocaleString()+'円×12ヶ月）でスタートします</div>';
-  h += '<div class="wt-budget-display"><div class="wt-budget-val">'+yearly.toLocaleString()+'円</div><div class="wt-budget-lbl">バーチャル開始資金</div></div>';
+  h += '<div class="wt-result-sub">'+goalMsg+'<br>バーチャル資金 <strong style="color:var(--cyan)">1,000,000円</strong> でスタートします</div>';
+  h += '<div class="wt-budget-display"><div class="wt-budget-val">1,000,000円</div><div class="wt-budget-lbl">バーチャル開始資金</div></div>';
   h += '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-align:left">おすすめ銘柄（チェックを外すと追加しません）</div>';
   h += '<div class="wt-stocks">'+stocksH+'</div>';
-  h += '<button class="wt-next" onclick="wtApply('+yearly+','+rsiThr+')">バーチャルトレードをスタート！🚀</button>';
+  h += '<button class="wt-next" onclick="wtApply('+budget+','+rsiThr+')">バーチャルトレードをスタート！🚀</button>';
   h += '</div>';
   document.getElementById('wtContent').innerHTML = h;
   document.getElementById('wtProgress').querySelectorAll('.wt-dot').forEach(function(d){d.className='wt-dot done';});
@@ -1222,7 +1236,7 @@ function wtApply(budget, rsiThr) {
       if(!recommended.find(function(r){return r.code===s.code;}))recommended.push(s);
     });
   });
-  recommended = recommended.slice(0,5);
+  recommended = recommended.slice(0,6);
 
   recommended.forEach(function(s){
     var cb = document.getElementById('wts-'+s.code);
