@@ -1110,14 +1110,26 @@ function wtOptHTML(step, o) {
   var isSel = step.multi ? (sel.indexOf(o.val)>=0) : (sel===o.val);
   var cls = 'wt-opt' + (isSel?' sel':'');
   var multi = step.multi ? 'true' : 'false';
-  var valStr = typeof o.val === 'number' ? o.val : JSON.stringify(o.val);
-  var h = '<div class="' + cls + '" onclick="wtSelect(' + JSON.stringify(step.id) + ',' + valStr + ',' + multi + ')">';
+  var h = '<div class="' + cls + '" data-step-id="' + step.id + '" data-val="' + String(o.val) + '" data-multi="' + multi + '" onclick="wtSelectThis(this)">';
   h += '<div class="wt-opt-icon">' + o.icon + '</div>';
   h += '<div class="wt-opt-text">';
   h += '<div class="wt-opt-title">' + o.title + '</div>';
   h += '<div class="wt-opt-desc">' + o.desc + '</div>';
   h += '</div></div>';
   return h;
+}
+
+function wtSelectThis(el) {
+  var id = el.getAttribute('data-step-id');
+  var rawVal = el.getAttribute('data-val');
+  var multi = el.getAttribute('data-multi') === 'true';
+  var step = WT.steps.find(function(s){ return s.id === id; });
+  var val = rawVal;
+  if(step) {
+    var opt = step.opts.find(function(o){ return String(o.val) === rawVal; });
+    if(opt) val = opt.val;
+  }
+  wtSelect(id, val, multi);
 }
 
 function wtRender() {
