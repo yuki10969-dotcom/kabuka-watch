@@ -1,10 +1,15 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" }
-  ],
+  "functions": {
+    "api/*.js": {
+      "runtime": "@vercel/node@3.0.0"
+    }
+  },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    { "src": "/icons/(.*)", "dest": "/public/icons/$1" },
+    { "src": "/sw.js", "dest": "/public/sw.js" },
+    { "src": "/manifest.json", "dest": "/public/manifest.json" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
   ]
 }
