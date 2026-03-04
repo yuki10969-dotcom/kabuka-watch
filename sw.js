@@ -1,4 +1,4 @@
-const CACHE = 'kabuka-v1';
+const CACHE = 'kabuka-v' + self.registration.scope + '-20250305';
 const STATIC = [
   '/',
   '/manifest.json',
@@ -33,6 +33,14 @@ self.addEventListener('fetch', e => {
           return res;
         })
         .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // index.html: 常にネットワークから取得（キャッシュしない）
+  if (url.pathname === '/' || url.pathname === '/index.html') {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
     );
     return;
   }
