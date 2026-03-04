@@ -1,0 +1,9 @@
+{
+  "name": "kabuka-watch",
+  "version": "1.0.0",
+  "description": "日本株リアルタイム監視・チャート・バーチャルトレードPWA",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
