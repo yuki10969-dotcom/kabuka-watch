@@ -1268,6 +1268,11 @@ function wtForce() {
 document.addEventListener('DOMContentLoaded', function(){
   if(!localStorage.getItem('wt-done')) wtForce();
 });
+  document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('wtBtn');
+  if(btn) btn.addEventListener('click', wtForce);
+  if(!localStorage.getItem('wt-done')) wtForce();
+});
 // ===== WALKTHROUGH END =====
 
 render();
