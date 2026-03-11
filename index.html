@@ -1263,10 +1263,7 @@ function wtForce() {
   localStorage.removeItem('wt-done');
   WT.step=0; WT.ans={};
   var el = document.getElementById('wtOverlay');
-  if(el) {
-    el.style.cssText = 'display:flex;align-items:center;justify-content:center;position:fixed;top:0;left:0;width:100%;height:100%;z-index:10000;background:rgba(4,7,14,.97);';
-    wtRender();
-  }
+  if(el) { el.classList.add('open'); wtRender(); }
 }
 document.addEventListener('DOMContentLoaded', function(){
   if(!localStorage.getItem('wt-done')) wtForce();
