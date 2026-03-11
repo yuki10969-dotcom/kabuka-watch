@@ -1256,9 +1256,19 @@ function wtApply(budget, rsiThr) {
   toast('🎉 '+recommended.length+'銘柄を追加しました！「監視スタート」で価格を取得できます');
 }
 
-setTimeout(function(){
-  if(!localStorage.getItem('wt-done')) wtStart();
-},800);
+// ページ読み込み完了後にウォークスルーを表示
+function tryShowWT() {
+  if(!localStorage.getItem('wt-done')) {
+    WT.step=0; WT.ans={};
+    var el = document.getElementById('wtOverlay');
+    if(el) {
+      el.style.cssText = 'display:flex;align-items:center;justify-content:center;position:fixed;top:0;left:0;right:0;bottom:0;z-index:10000;background:rgba(4,7,14,.97);';
+      wtRender();
+    }
+  }
+}
+document.addEventListener('DOMContentLoaded', function(){ setTimeout(tryShowWT, 500); });
+window.addEventListener('load', function(){ setTimeout(tryShowWT, 500); });
 // ===== WALKTHROUGH END =====
 
 render();
