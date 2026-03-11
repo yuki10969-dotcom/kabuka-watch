@@ -1,6 +1,6 @@
-const CACHE = 'kabuka-v' + self.registration.scope + '-20250305';
+const CACHE = 'kabuka-v3';
+// index.htmlはキャッシュしない！
 const STATIC = [
-  '/',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js',
   'https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js',
@@ -37,11 +37,9 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // index.html: 常にネットワークから取得（キャッシュしない）
+  // index.html: 絶対にキャッシュしない、常にネットワークから取得
   if (url.pathname === '/' || url.pathname === '/index.html') {
-    e.respondWith(
-      fetch(e.request).catch(() => caches.match(e.request))
-    );
+    e.respondWith(fetch(e.request));
     return;
   }
 
