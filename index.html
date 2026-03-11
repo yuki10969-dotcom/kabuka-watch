@@ -1108,7 +1108,10 @@ var WT = {
 function wtStart() {
   if(localStorage.getItem('wt-done'))return;
   WT.step=0; WT.ans={};
-  document.getElementById('wtOverlay').style.display='flex';
+  var el = document.getElementById('wtOverlay');
+  el.style.display='flex';
+  el.style.alignItems='center';
+  el.style.justifyContent='center';
   wtRender();
 }
 
