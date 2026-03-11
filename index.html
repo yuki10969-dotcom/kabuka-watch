@@ -1119,7 +1119,7 @@ function wtStart() {
 
 function wtSkip() {
   localStorage.setItem('wt-done','1');
-  document.getElementById('wtOverlay').style.display='none';
+  document.getElementById('wtOverlay').classList.remove('open');
 }
 
 function wtOptHTML(step, o) {
