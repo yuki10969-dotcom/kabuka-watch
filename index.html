@@ -797,7 +797,8 @@ function renderT(){
     '</div>';
   });
   var empty='<div style="color:var(--muted);text-align:center;padding:40px 24px">取引がありません。「取引追加」から登録してください</div>';
-  document.getElementById('tPosBody').innerHTML=rows.length?rows.join(''):empty;
+  var header='<div class="pos-header"><div class="pos-hcol">銘柄</div><div class="pos-hcol">現在値<br><span style="font-weight:400">取得単価</span></div><div class="pos-hcol">評価損益<br><span style="font-weight:400">損益率</span></div></div>';
+  document.getElementById('tPosBody').innerHTML=rows.length?(header+rows.join('')):empty;
   var pc2=tPnl>0?'pp':tPnl<0?'np':'zp';
   var pct2=tCost>0?tPnl/tCost*100:0;
   document.getElementById('tSmry').innerHTML=
