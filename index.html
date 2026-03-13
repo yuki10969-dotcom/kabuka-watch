@@ -779,25 +779,21 @@ function renderT(){
     if(pnl!=null){tPnl+=pnl;tCost+=cost;}
     var pc=pnl==null?'zp':pnl>0?'pp':pnl<0?'np':'zp';
     var nm=stocks[t.code]?(' <span style="font-size:10px;color:var(--muted)">'+stocks[t.code].name+'</span>'):'';
-   var typeLabel='<span class="'+TC[t.type]+'">'+TL[t.type]+'</span>';
-    return '<div class="pos-card">'+
-      '<div class="pos-card-top">'+
-        '<div class="pos-card-left">'+
-          '<div class="pos-code">'+t.code+(stocks[t.code]?' <span class="pos-nisa">NISA</span>':'')+'</div>'+
-          '<div class="pos-name">'+(stocks[t.code]?stocks[t.code].name:t.code)+'</div>'+
-        '</div>'+
-        '<div class="pos-card-right">'+
-          '<div class="pos-pnl '+pc+'">'+(pnl!=null?(pnl>=0?'+':'')+Math.round(pnl).toLocaleString()+'円':'---')+'</div>'+
-          '<div class="pos-pct '+pc+'">'+(pct!=null?(pct>=0?'+':'')+pct.toFixed(2)+'%':'---')+'</div>'+
-        '</div>'+
+  var isNisa=!!stocks[t.code];
+    return '<div class="pos-row" onclick="openPosModal('+t.id+')">'+
+      '<div class="pos-row-left">'+
+        '<div class="pos-code">'+t.code+(isNisa?' <span class="pos-nisa">NISA</span>':'')+'</div>'+
+        '<div class="pos-name">'+(stocks[t.code]?stocks[t.code].name:t.code)+'</div>'+
       '</div>'+
-      '<div class="pos-card-bot">'+
-        '<div class="pos-detail"><span class="pos-dl">現在値</span><span class="pos-dv">'+(cur!=null?cur.toLocaleString()+'円':'---')+'</span></div>'+
-        '<div class="pos-detail"><span class="pos-dl">取得単価</span><span class="pos-dv">'+t.price.toLocaleString()+'円</span></div>'+
-        '<div class="pos-detail"><span class="pos-dl">株数</span><span class="pos-dv">'+t.qty.toLocaleString()+'株</span></div>'+
-        '<div class="pos-detail"><span class="pos-dl">取得日</span><span class="pos-dv">'+t.date+'</span></div>'+
+      '<div class="pos-row-mid">'+
+        '<div class="pos-cur">'+(cur!=null?cur.toLocaleString()+'円':'---')+'</div>'+
+        '<div class="pos-acq">'+t.price.toLocaleString()+'円</div>'+
       '</div>'+
-      '<button class="pos-del" onclick="delTrade('+t.id+')">✕ 削除</button>'+
+      '<div class="pos-row-right">'+
+        '<div class="pos-pnl '+pc+'">'+(pnl!=null?(pnl>=0?'+':'')+Math.round(pnl).toLocaleString()+'円':'---')+'</div>'+
+        '<div class="pos-pct '+pc+'">'+(pct!=null?(pct>=0?'+':'')+pct.toFixed(2)+'%':'---')+'</div>'+
+      '</div>'+
+      '<span class="pos-arrow">›</span>'+
     '</div>';
   });
   var empty='<div style="color:var(--muted);text-align:center;padding:40px 24px">取引がありません。「取引追加」から登録してください</div>';
