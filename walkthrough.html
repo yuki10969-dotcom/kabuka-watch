@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>株価Watch - はじめての設定</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a12;--panel:#0d1524;--panel2:#111e32;--border:#1c2e48;--cyan:#00e5ff;--green:#00ff9d;--red:#ff4d6d;--yellow:#ffe066;--purple:#b388ff;--text:#dce8f5;--muted:#4a6380;--dim:#7a9ab8}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+.wt-box{width:92%;max-width:560px;max-height:90vh;overflow-y:auto;background:var(--panel);border:1px solid var(--border);border-radius:24px;padding:36px 32px;position:relative;z-index:1;}
+.wt-skip{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:6px 10px;border-radius:6px;}
+.wt-skip:hover{color:var(--text);}
+.wt-progress{display:flex;gap:6px;margin-bottom:28px;}
+.wt-dot{height:4px;border-radius:2px;flex:1;background:var(--border);transition:background .4s;}
+.wt-dot.done{background:var(--cyan);}
+.wt-dot.active{background:var(--cyan);animation:wt-pulse 1.5s infinite;}
+@keyframes wt-pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.wt-step{animation:wt-in .4s ease;}
+@keyframes wt-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.wt-emoji{font-size:42px;margin-bottom:12px;display:block;}
+.wt-q{font-size:20px;font-weight:900;color:var(--text);margin-bottom:6px;line-height:1.4;}
+.wt-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6;}
+.wt-opts{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.wt-opt{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px;text-align:left;}
+.wt-opt:hover{border-color:var(--cyan);background:rgba(0,229,255,.05);}
+.wt-opt.sel{border-color:var(--cyan);background:rgba(0,229,255,.08);}
+.wt-opt-icon{font-size:22px;flex-shrink:0;}
+.wt-opt-text{flex:1;}
+.wt-opt-title{font-size:14px;font-weight:700;color:var(--text);}
+.wt-opt-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+.wt-opt.sel .wt-opt-title{color:var(--cyan);}
+.wt-next{width:100%;margin-top:20px;padding:14px;background:var(--cyan);color:#000;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;transition:all .2s;font-family:'Zen Kaku Gothic New',sans-serif;}
+.wt-next:hover{background:#33eeff;}
+.wt-next:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+.wt-result{text-align:center;}
+.wt-result-title{font-size:22px;font-weight:900;color:var(--cyan);margin-bottom:8px;}
+.wt-result-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.7;}
+.wt-stocks{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;text-align:left;}
+.wt-stock-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;}
+.wt-stock-check{width:20px;height:20px;accent-color:var(--cyan);}
+.wt-stock-code{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--cyan);min-width:50px;}
+.wt-stock-name{font-size:13px;color:var(--text);}
+.wt-budget-display{background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);border-radius:12px;padding:16px;text-align:center;margin-bottom:20px;}
+.wt-budget-val{font-size:32px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--cyan);}
+.wt-budget-lbl{font-size:11px;color:var(--muted);margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wt-box">
+  <button class="wt-skip" onclick="skipWT()">スキップ ✕</button>
+  <div class="wt-progress" id="wtProgress"></div>
+  <div id="wtContent"></div>
+</div>
+
+<script>
+var WT = {
+  step: 0,
+  ans: {},
+  steps: [
+    {id:'exp', emoji:'👋', q:'はじめまして！投資の経験はありますか？', sub:'あなたに合った設定でスタートします。正直に選んでください！',
+     opts:[{icon:'🌱',title:'まったくはじめて',desc:'投資という言葉は知っているけど…という方',val:'none'},
+           {icon:'📚',title:'少し勉強したことがある',desc:'本やWebで調べたことはある',val:'some'},
+           {icon:'📈',title:'実際に取引したことがある',desc:'証券口座を持ったことがある',val:'exp'}]},
+    {id:'style', emoji:'🎯', q:'投資スタイルはどちらに近いですか？', sub:'アラート条件の設定に使います。後から変更できます。',
+     opts:[{icon:'🌳',title:'じっくり長期保有',desc:'数ヶ月〜1年以上持ち続けたい',val:'long'},
+           {icon:'⚡',title:'短期で売買したい',desc:'数日〜数週間で売り買いしたい',val:'short'},
+           {icon:'🤔',title:'まだわからない',desc:'両方試しながら決めたい',val:'both'}]},
+    {id:'sector', emoji:'🏭', q:'興味のある分野はどれですか？', sub:'おすすめ銘柄の選定に使います。複数選んでもOK！', multi:true,
+     opts:[{icon:'💻',title:'IT・テクノロジー',desc:'ソフトバンク・ソニーなど',val:'tech'},
+           {icon:'🚗',title:'自動車・製造業',desc:'トヨタ・ホンダなど',val:'auto'},
+           {icon:'🍺',title:'食品・生活用品',desc:'アサヒ・味の素など',val:'food'},
+           {icon:'🏦',title:'金融・銀行',desc:'三菱UFJ・野村HDなど',val:'finance'},
+           {icon:'🏠',title:'不動産・建設',desc:'三井不動産・大和ハウスなど',val:'realty'},
+           {icon:'🏥',title:'医療・ヘルスケア',desc:'武田薬品・エーザイなど',val:'health'},
+           {icon:'⚡',title:'エネルギー・資源',desc:'ENEOS・出光興産など',val:'energy'},
+           {icon:'🛍️',title:'小売・EC',desc:'イオン・セブン&アイなど',val:'retail'},
+           {icon:'📡',title:'通信・インフラ',desc:'NTT・KDDI・ソフトバンクなど',val:'telecom'},
+           {icon:'🎮',title:'エンタメ・ゲーム',desc:'任天堂・バンナムHDなど',val:'game'}]},
+    {id:'goal', emoji:'🏆', q:'投資の目標を教えてください', sub:'あなたに合ったアドバイスをするために使います',
+     opts:[{icon:'📈',title:'お金を増やしたい',desc:'資産形成・FIRE・老後の備えなど',val:'grow'},
+           {icon:'🎓',title:'株の勉強をしたい',desc:'経済や企業分析を学びたい',val:'learn'},
+           {icon:'🛡️',title:'将来への備えとして',desc:'インフレ対策・分散投資など',val:'save'}]}
+  ],
+  STOCKS: {
+    tech:[{code:'4755',name:'楽天グループ'},{code:'9984',name:'ソフトバンクG'},{code:'6758',name:'ソニーグループ'},{code:'4689',name:'LINEヤフー'}],
+    auto:[{code:'7203',name:'トヨタ自動車'},{code:'7267',name:'ホンダ'},{code:'7269',name:'スズキ'},{code:'6902',name:'デンソー'}],
+    food:[{code:'2914',name:'JT'},{code:'2502',name:'アサヒグループ'},{code:'2802',name:'味の素'},{code:'2269',name:'明治HD'}],
+    finance:[{code:'8306',name:'三菱UFJ'},{code:'8316',name:'三井住友FG'},{code:'8411',name:'みずほFG'},{code:'8604',name:'野村HD'}],
+    realty:[{code:'8801',name:'三井不動産'},{code:'8802',name:'三菱地所'},{code:'1925',name:'大和ハウス'},{code:'8830',name:'住友不動産'}],
+    health:[{code:'4502',name:'武田薬品'},{code:'4523',name:'エーザイ'},{code:'4519',name:'中外製薬'},{code:'4568',name:'第一三共'}],
+    energy:[{code:'5019',name:'出光興産'},{code:'5020',name:'ENEOS'},{code:'9531',name:'東京ガス'},{code:'9503',name:'関西電力'}],
+    retail:[{code:'8267',name:'イオン'},{code:'3382',name:'セブン&アイ'},{code:'9983',name:'ファーストリテイリング'},{code:'4452',name:'花王'}],
+    telecom:[{code:'9432',name:'NTT'},{code:'9433',name:'KDDI'},{code:'9434',name:'ソフトバンク'}],
+    game:[{code:'7974',name:'任天堂'},{code:'7832',name:'バンダイナムコHD'},{code:'9684',name:'スクウェア・エニックス'}]
+  }
+};
+
+function skipWT() {
+  localStorage.setItem('wt-done','1');
+  location.href = '/';
+}
+
+function render() {
+  var prog = document.getElementById('wtProgress');
+  prog.innerHTML = WT.steps.map(function(_,i){
+    var cls = i < WT.step ? 'done' : i === WT.step ? 'active' : '';
+    return '<div class="wt-dot ' + cls + '"></div>';
+  }).join('');
+
+  var step = WT.steps[WT.step];
+  var sel = WT.ans[step.id] !== undefined ? WT.ans[step.id] : (step.multi ? [] : null);
+  var hasAns = step.multi ? (Array.isArray(sel) && sel.length > 0) : (WT.ans[step.id] !== undefined);
+  var isLast = WT.step === WT.steps.length - 1;
+
+  var h = '<div class="wt-step">';
+  h += '<span class="wt-emoji">' + step.emoji + '</span>';
+  h += '<div class="wt-q">' + step.q + '</div>';
+  h += '<div class="wt-sub">' + step.sub + '</div>';
+  h += '<div class="wt-opts">';
+  step.opts.forEach(function(o) {
+    var isSel = step.multi ? (sel.indexOf(o.val) >= 0) : (sel === o.val);
+    var cls = 'wt-opt' + (isSel ? ' sel' : '');
+    h += '<div class="' + cls + '" data-id="' + step.id + '" data-val="' + String(o.val) + '" data-multi="' + (step.multi ? '1' : '0') + '">';
+    h += '<div class="wt-opt-icon">' + o.icon + '</div>';
+    h += '<div class="wt-opt-text">';
+    h += '<div class="wt-opt-title">' + o.title + '</div>';
+    h += '<div class="wt-opt-desc">' + o.desc + '</div>';
+    h += '</div></div>';
+  });
+  h += '</div>';
+  h += '<button class="wt-next" id="nextBtn"' + (hasAns ? '' : ' disabled') + '>';
+  h += isLast ? '結果を見る →' : '次へ →';
+  h += '</button></div>';
+  document.getElementById('wtContent').innerHTML = h;
+
+  // イベントをaddEventListenerで設定
+  document.querySelectorAll('.wt-opt').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var id = this.getAttribute('data-id');
+      var val = this.getAttribute('data-val');
+      var multi = this.getAttribute('data-multi') === '1';
+      var step = WT.steps.find(function(s){ return s.id === id; });
+      if(step) {
+        var opt = step.opts.find(function(o){ return String(o.val) === val; });
+        if(opt) val = opt.val;
+      }
+      if(multi) {
+        if(!WT.ans[id]) WT.ans[id] = [];
+        var idx = WT.ans[id].indexOf(val);
+        if(idx >= 0) WT.ans[id].splice(idx, 1); else WT.ans[id].push(val);
+      } else {
+        WT.ans[id] = val;
+      }
+      render();
+    });
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', function() {
+    if(WT.step < WT.steps.length - 1) { WT.step++; render(); }
+    else showResult();
+  });
+}
+
+function showResult() {
+  var rsiThr = WT.ans.style === 'long' ? 35 : 30;
+  var budget = 1000000;
+  var sectors = WT.ans.sector || ['tech'];
+  if(!sectors.length) sectors = ['tech'];
+  var recommended = [];
+  sectors.forEach(function(sec) {
+    (WT.STOCKS[sec] || []).slice(0,2).forEach(function(s) {
+      if(!recommended.find(function(r){ return r.code === s.code; })) recommended.push(s);
+    });
+  });
+  recommended = recommended.slice(0,6);
+
+  var goalMsg = {grow:'資産を増やすために、買いサインを見逃さないよう監視します',learn:'学習用に幅広い銘柄を監視して、パターンを学びましょう',save:'安定銘柄を中心に、長期目線で監視します'}[WT.ans.goal] || '';
+
+  var h = '<div class="wt-step wt-result">';
+  h += '<span class="wt-emoji">🎉</span>';
+  h += '<div class="wt-result-title">準備完了！</div>';
+  h += '<div class="wt-result-sub">' + goalMsg + '<br>バーチャル資金 <strong style="color:var(--cyan)">1,000,000円</strong> でスタートします</div>';
+  h += '<div class="wt-budget-display"><div class="wt-budget-val">1,000,000円</div><div class="wt-budget-lbl">バーチャル開始資金</div></div>';
+  h += '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-align:left">おすすめ銘柄（チェックを外すと追加しません）</div>';
+  h += '<div class="wt-stocks">';
+  recommended.forEach(function(s) {
+    h += '<div class="wt-stock-item">';
+    h += '<input type="checkbox" class="wt-stock-check" checked id="wts-' + s.code + '">';
+    h += '<div class="wt-stock-code">' + s.code + '</div>';
+    h += '<div class="wt-stock-name">' + s.name + '</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+  h += '<button class="wt-next" id="applyBtn">バーチャルトレードをスタート！🚀</button>';
+  h += '</div>';
+  document.getElementById('wtContent').innerHTML = h;
+  document.getElementById('wtProgress').querySelectorAll('.wt-dot').forEach(function(d){ d.className = 'wt-dot done'; });
+
+  document.getElementById('applyBtn').addEventListener('click', function() {
+    applyWT(recommended, budget, rsiThr);
+  });
+}
+
+function applyWT(recommended, budget, rsiThr) {
+  var SK = 'kbk4';
+  var D;
+  try { D = JSON.parse(localStorage.getItem(SK)) || {}; } catch(e) { D = {}; }
+  if(!D.stocks) D.stocks = {};
+
+  recommended.forEach(function(s) {
+    var cb = document.getElementById('wts-' + s.code);
+    if(cb && !cb.checked) return;
+    if(!D.stocks[s.code]) {
+      D.stocks[s.code] = {name:s.name,tp:null,ri:rsiThr,uma:true,upb:true,price:null,chg:null,rd:null,rw:null,m5:null,m25:null,pc:null,pa:null,upd:null,alts:[]};
+    }
+  });
+  D.vtBudget = budget;
+  D.vtRemain = budget;
+  localStorage.setItem(SK, JSON.stringify(D));
+  localStorage.setItem('wt-done', '1');
+  location.href = '/';
+}
+
+render();
+</script>
+</body>
+</html>
