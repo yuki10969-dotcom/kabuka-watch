@@ -763,7 +763,7 @@ function renderT(){
       '<button class="pos-del" onclick="delTrade('+t.id+')">✕ 削除</button>'+
     '</div>';
   });
-  var empty='<tr><td colspan="9" style="color:var(--muted);text-align:center;padding:24px">取引がありません。「取引追加」から登録してください</td></tr>';
+  var empty='<div style="color:var(--muted);text-align:center;padding:40px 24px">取引がありません。「取引追加」から登録してください</div>';
   document.getElementById('tPosBody').innerHTML=rows.length?rows.join(''):empty;
   var pc2=tPnl>0?'pp':tPnl<0?'np':'zp';
   var pct2=tCost>0?tPnl/tCost*100:0;
