@@ -6,7 +6,7 @@ h<!DOCTYPE html>
   <meta name="theme-color" content="#00e5ff">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="株価Watch">
+  <meta name="apple-mobile-web-app-title" content="株価Watch">h
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -759,10 +759,12 @@ function renderT(){
   var pc2=tPnl>0?'pp':tPnl<0?'np':'zp';
   var pct2=tCost>0?tPnl/tCost*100:0;
   document.getElementById('tSmry').innerHTML=
-    '<div class="sbox"><div class="sl">ポジション数</div><div class="sv" style="color:var(--cyan)">'+buys.length+'</div></div>'+
-    '<div class="sbox"><div class="sl">含み損益</div><div class="sv '+pc2+'">'+(tPnl>=0?'+':'')+Math.round(tPnl).toLocaleString()+'円</div></div>'+
-    '<div class="sbox"><div class="sl">損益率</div><div class="sv '+pc2+'">'+(pct2>=0?'+':'')+pct2.toFixed(2)+'%</div></div>'+
-    '<div class="sbox"><div class="sl">投資元本</div><div class="sv" style="color:var(--text)">'+Math.round(tCost).toLocaleString()+'円</div></div>';
+   '<div class="sbox" style="border-color:rgba(0,229,255,.25)"><div class="sl">💰 残り資金</div><div class="sv" style="color:var(--cyan)">'+(D.vtRemain!=null?Math.round(D.vtRemain).toLocaleString():'---')+'円</div></div>'+
+    '<div class="sbox" style="border-color:rgba(0,229,255,.25)"><div class="sl">🏦 総資産</div><div class="sv" style="color:var(--cyan)">'+(D.vtRemain!=null?Math.round(D.vtRemain+Math.max(0,tCost+tPnl)).toLocaleString():'---')+'円</div></div>'+
+    '<div class="sbox"><div class="sl">📈 含み損益</div><div class="sv '+pc2+'">'+(tPnl>=0?'+':'')+Math.round(tPnl).toLocaleString()+'円</div></div>'+
+    '<div class="sbox"><div class="sl">📉 損益率</div><div class="sv '+pc2+'">'+(pct2>=0?'+':'')+pct2.toFixed(2)+'%</div></div>'+
+    '<div class="sbox"><div class="sl">🏆 ポジション数</div><div class="sv" style="color:var(--text)">'+buys.length+'件</div></div>'+
+    '<div class="sbox"><div class="sl">💵 投資元本</div><div class="sv" style="color:var(--muted)">'+Math.round(tCost).toLocaleString()+'円</div></div>';
   var hrows=trades.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(t){
     var nm=stocks[t.code]?(' <span style="font-size:10px;color:var(--muted)">'+stocks[t.code].name+'</span>'):'';
     return '<tr>'+
