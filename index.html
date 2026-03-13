@@ -760,6 +760,49 @@ function addTrade(){
   setTT('pos');
   if(selCode===code)loadChart(code,curRng);
 }
+  function openPosModal(id){
+  var D2=JSON.parse(localStorage.getItem(SK)||'{}');
+  var t=(D2.trades||[]).find(function(x){return x.id===id;});
+  if(!t) return;
+  var stocks2=D2.stocks||{};
+  var cur=stocks2[t.code]?stocks2[t.code].price:null;
+  var cost=t.price*t.qty;
+  var pnl=cur!=null?(t.type==='short'?(t.price-cur)*t.qty:(cur-t.price)*t.qty):null;
+  var pct=pnl!=null?pnl/cost*100:null;
+  var pc=pnl==null?'zp':pnl>0?'pp':pnl<0?'np':'zp';
+  var nm=stocks2[t.code]?stocks2[t.code].name:t.code;
+  var chartUrl='https://finance.yahoo.co.jp/quote/'+t.code+'.T/chart';
+  var overlay=document.createElement('div');
+  overlay.className='pm-overlay';
+  overlay.id='posModal';
+  overlay.onclick=function(e){if(e.target===overlay)closePosModal();};
+  overlay.innerHTML=
+    '<div class="pm-sheet">'+
+      '<div class="pm-title">('+t.code+') '+nm+'</div>'+
+      '<div class="pm-sub">'+t.qty+'株 / 取得 '+t.price.toLocaleString()+'円 / '+t.date+'</div>'+
+      '<div class="pm-pnl-row">'+
+        '<div class="pm-pnl-item"><div class="pm-pnl-label">現在値</div><div class="pm-pnl-val" style="color:var(--text)">'+(cur!=null?cur.toLocaleString()+'円':'---')+'</div></div>'+
+        '<div class="pm-pnl-item"><div class="pm-pnl-label">評価損益</div><div class="pm-pnl-val '+pc+'">'+(pnl!=null?(pnl>=0?'+':'')+Math.round(pnl).toLocaleString()+'円':'---')+'</div></div>'+
+        '<div class="pm-pnl-item"><div class="pm-pnl-label">損益率</div><div class="pm-pnl-val '+pc+'">'+(pct!=null?(pct>=0?'+':'')+pct.toFixed(2)+'%':'---')+'</div></div>'+
+      '</div>'+
+      '<div class="pm-section">現物取引</div>'+
+      '<div class="pm-btns">'+
+        '<button class="pm-btn buy" onclick="closePosModal();setTT(\'add\');document.getElementById(\'tf-code\').value=\''+t.code+'\';document.getElementById(\'tf-type\').value=\'buy\'">現物買</button>'+
+        '<button class="pm-btn sell" onclick="closePosModal();setTT(\'add\');document.getElementById(\'tf-code\').value=\''+t.code+'\';document.getElementById(\'tf-type\').value=\'sell\'">現物売</button>'+
+      '</div>'+
+      '<div class="pm-section">その他</div>'+
+      '<div class="pm-btns">'+
+        '<button class="pm-btn chart" onclick="window.open(\''+chartUrl+'\',\'_blank\')">📈 チャートを見る（Yahoo!ファイナンス）</button>'+
+        '<button class="pm-btn del" onclick="closePosModal();delTrade('+id+')">✕ このポジションを削除</button>'+
+      '</div>'+
+      '<button class="pm-close" onclick="closePosModal()">閉じる</button>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+function closePosModal(){
+  var m=document.getElementById('posModal');
+  if(m) m.remove();
+}
 function delTrade(id){
   if(!confirm('この取引を削除しますか？'))return;
   D.trades=(D.trades||[]).filter(function(t){return t.id!==id;});
