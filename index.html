@@ -752,9 +752,36 @@ function addTrade(){
   var memo=document.getElementById('tf-memo').value.trim();
   if(!code||!date||!price||!qty){toast('コード・日付・価格・株数は必須です',1);return;}
   if(!D.trades)D.trades=[];
-  D.trades.push({id:Date.now(),code:code,type:type,date:date,price:price,qty:qty,memo:memo});
-  save();
-  toast('追加しました ('+code+' '+TL[type]+' '+price.toLocaleString()+'円 x'+qty+'株)');
+  // 売り取引：買いポジションをFIFO消化して確定損益を記録
+  if(type==='sell'){
+    var remain=qty;
+    var realizedPnl=0;
+    var buysForCode=D.trades.filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;});
+    buysForCode.sort(function(a,b){return a.date>b.date?1:-1;});
+    for(var i=0;i<buysForCode.length&&remain>0;i++){
+      var b=buysForCode[i];
+      var consume=Math.min(b.qty,remain);
+      realizedPnl+=consume*(price-b.price);
+      b.qty-=consume;
+      remain-=consume;
+    }
+    // qty=0になったポジションを削除
+    D.trades=D.trades.filter(function(t){return !(t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty===0);});
+    if(remain>0){
+      D.trades.push({id:Date.now(),code:code,type:'sell',date:date,price:price,qty:remain,memo:memo,realized:0});
+    }
+    // 確定損益を累積
+    if(!D.realizedPnl)D.realizedPnl=0;
+    D.realizedPnl+=realizedPnl;
+    if(!D.realizedLog)D.realizedLog=[];
+    D.realizedLog.push({date:date,code:code,qty:qty,sellPrice:price,pnl:realizedPnl});
+    save();
+    toast('売却しました ('+code+' '+price.toLocaleString()+'円 x'+qty+'株 確定損益:'+(realizedPnl>=0?'+':'')+Math.round(realizedPnl).toLocaleString()+'円)');
+  } else {
+    D.trades.push({id:Date.now(),code:code,type:type,date:date,price:price,qty:qty,memo:memo});
+    save();
+    toast('追加しました ('+code+' '+TL[type]+' '+price.toLocaleString()+'円 x'+qty+'株)');
+  }
   document.getElementById('tf-price').value='';
   document.getElementById('tf-memo').value='';
   setTT('pos');
