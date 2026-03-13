@@ -753,7 +753,10 @@ function addTrade(){
   if(!code||!date||!price||!qty){toast('コード・日付・価格・株数は必須です',1);return;}
   if(!D.trades)D.trades=[];
   // 売り取引：買いポジションをFIFO消化して確定損益を記録
-  if(type==='sell'){
+ if(type==='sell'){
+    // 買いポジションがない銘柄は売り不可
+    var hasBuy=(D.trades||[]).some(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;});
+    if(!hasBuy){toast(code+'の買いポジションがありません',1);return;}
     var remain=qty;
     var realizedPnl=0;
     var buysForCode=D.trades.filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;});
