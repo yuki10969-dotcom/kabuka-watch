@@ -666,7 +666,8 @@ function drawCandle(code,d,box){
   maPeriods.forEach(function(n,idx){
     var ms=lwC.addLineSeries({color:maColors[idx],lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
     ms.setData(raw.map(function(x,i){if(i<n-1)return null;var sv=0;for(var j=i-(n-1);j<=i;j++)sv+=cls[j];return{time:x.time,value:sv/n};}).filter(Boolean));
-  });
+ });
+  if(raw.length>0){setTimeout(function(){if(lwC)lwC.timeScale().setVisibleLogicalRange({from:raw.length-30,to:raw.length-1});},50);}
   if(s&&s.tp)cs.createPriceLine({price:s.tp,color:'rgba(255,224,102,.9)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'目標'});
   var mkrs=(D.trades||[]).filter(function(t){return t.code===code;})
     .map(function(t){
