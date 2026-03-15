@@ -592,7 +592,7 @@ function toast(msg,err=0,col=null){
 }
 
 
-var selCode=null,curRng='1mo',curCT='candle',lwC=null,chartMC=null,CD={};
+var selCode=null,curRng='daily',curCT='candle',lwC=null,chartMC=null,CD={};
 function clickCard(c){
   selCode=c;render();
   var panel=document.getElementById('chartPanel');panel.style.display='';
