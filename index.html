@@ -667,12 +667,12 @@ function drawCandle(code,d,box){
   }
   cs.setData(raw);
   var cls=raw.map(function(x){return x.close;});
-  var m5=lwC.addLineSeries({color:'rgba(0,255,157,.8)',lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
-  m5.setData(raw.map(function(x,i){if(i<4)return null;var s=0;for(var j=i-4;j<=i;j++)s+=cls[j];return{time:x.time,value:s/5};}).filter(Boolean));
-  var m25=lwC.addLineSeries({color:'rgba(179,136,255,.8)',lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
-  m25.setData(raw.map(function(x,i){if(i<24)return null;var s=0;for(var j=i-24;j<=i;j++)s+=cls[j];return{time:x.time,value:s/25};}).filter(Boolean));
-  var m75=lwC.addLineSeries({color:'rgba(255,165,0,.8)',lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
-  m75.setData(raw.map(function(x,i){if(i<74)return null;var s=0;for(var j=i-74;j<=i;j++)s+=cls[j];return{time:x.time,value:s/75};}).filter(Boolean));
+  var maPeriods=curRng==='weekly'?[5,13,26]:curRng==='monthly'?[3,6,12]:[5,25,75];
+  var maColors=['rgba(0,255,157,.8)','rgba(179,136,255,.8)','rgba(255,165,0,.8)'];
+  maPeriods.forEach(function(n,idx){
+    var ms=lwC.addLineSeries({color:maColors[idx],lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    ms.setData(raw.map(function(x,i){if(i<n-1)return null;var sv=0;for(var j=i-(n-1);j<=i;j++)sv+=cls[j];return{time:x.time,value:sv/n};}).filter(Boolean));
+  });
   if(s&&s.tp)cs.createPriceLine({price:s.tp,color:'rgba(255,224,102,.9)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'目標'});
   var mkrs=(D.trades||[]).filter(function(t){return t.code===code;})
     .map(function(t){
