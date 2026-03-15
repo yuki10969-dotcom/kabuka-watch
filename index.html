@@ -1413,5 +1413,54 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 <!-- ===== WALKTHROUGH END ===== -->
+<script>
+function openGlossary(){
+  var el=document.getElementById('glossaryModal');
+  if(el){el.style.display='flex';return;}
+  var ov=document.createElement('div');
+  ov.id='glossaryModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:flex-end;justify-content:center;';
+  ov.onclick=function(e){if(e.target===ov)ov.style.display='none';};
+  ov.innerHTML=`<div style="background:#1a1f2e;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;">
+  <div style="font-size:16px;font-weight:700;color:#e2e8f0;text-align:center;margin-bottom:16px;">📖 用語解説</div>
+  <div style="display:flex;flex-direction:column;gap:12px;">
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">🕘 東京証券取引所の取引時間</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">前場：9:00〜11:30<br>後場：12:30〜15:30<br>土日・祝日・年末年始はお休みです。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">🕯 ローソク足とは</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">1本のローソクで「始値・高値・安値・終値」の4つを表します。<br>🟢 緑（陽線）：終値 > 始値 → その日上がった<br>🔴 赤（陰線）：終値 < 始値 → その日下がった<br>上下に伸びるひげは、その日の高値・安値を示します。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">📈 移動平均線（MA）とは</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">過去N日間の終値の平均を線で結んだもの。トレンドの方向を確認するのに使います。<br>🟢 5日線：短期の動き<br>🟣 25日線：中期の動き<br>🟠 75日線：長期のトレンド<br>株価が移動平均線を上回ると上昇トレンド、下回ると下降トレンドのサインとされます。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">📦 単元株とは</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">日本株は通常<strong style="color:#e2e8f0;">100株単位</strong>で売買します。株価が1,000円の場合、最低でも100株×1,000円＝<strong style="color:#e2e8f0;">10万円</strong>が必要です。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">🌱 NISA（ニーサ）とは</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">株や投資信託で得た利益が<strong style="color:#e2e8f0;">非課税</strong>になる国の制度です。通常は利益に約20%の税金がかかりますが、NISA口座を使うと0円になります。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">📌 指値・成行注文の違い</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;"><strong style="color:#e2e8f0;">指値（さしね）</strong>：「この値段で買いたい/売りたい」と価格を指定する注文。確実ではないが有利な価格で取引できる可能性あり。<br><strong style="color:#e2e8f0;">成行（なりゆき）</strong>：価格を指定せず今すぐ取引する注文。確実に約定するが値段は市場任せ。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">💰 配当金とは</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">企業が利益の一部を株主に還元するお金。保有株数×1株あたりの配当金が受け取れます。年1〜2回支払われることが多いです。</div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
+      <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">⚠️ 投資の注意点</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">株式投資には元本割れのリスクがあります。余裕資金で投資し、分散投資を心がけましょう。このアプリはバーチャルトレードで練習できます。</div>
+    </div>
+  </div>
+  <button onclick="document.getElementById('glossaryModal').style.display='none'" style="width:100%;margin-top:16px;padding:13px;background:rgba(255,255,255,.08);border:none;border-radius:10px;color:#e2e8f0;font-size:13px;cursor:pointer;font-weight:600;">閉じる</button>
+</div>`;
+  document.body.appendChild(ov);
+}
+</script>
 </body>
 </html>
