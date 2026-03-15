@@ -444,12 +444,7 @@ function card(c,i){
     '<div class="acts"><div class="ibtn" onclick="one(\''+c+'\')" title="更新">🔄</div>'+
     '<div class="ibtn del" onclick="delS(\''+c+'\')" title="削除">✕</div></div></div>'+
     '<div class="prow"><div class="pmain">'+ps+'</div>'+ch+'</div>'+
-    '<div class="inds">'+
-    '<div class="ibox"><div class="ilbl">日足 RSI</div><div class="ival '+rdc+'">'+(s.rd!=null?s.rd.toFixed(1):'---')+'</div></div>'+
-    '<div class="ibox"><div class="ilbl">週足 RSI</div><div class="ival '+rwc+'">'+(s.rw!=null?s.rw.toFixed(1):'---')+'</div></div>'+
-    '<div class="ibox"><div class="ilbl">MA5 / MA25</div><div class="ival" style="font-size:12px">'+(s.m5?Math.round(s.m5).toLocaleString():'---')+' / '+(s.m25?Math.round(s.m25).toLocaleString():'---')+'</div></div>'+
-    '<div class="ibox"><div class="ilbl">PBR（現在/1年平均）</div><div class="ival '+pbc+'" style="font-size:12px">'+(s.pc?s.pc.toFixed(2):'---')+' / '+(s.pa?s.pa.toFixed(2):'---')+'</div></div>'+
-    '</div><div class="tags">'+(tags.join('')||'<span style="font-size:11px;color:var(--muted)">条件未設定</span>')+'</div>'+
+   <div class="tags">'+(tags.join('')||'<span style="font-size:11px;color:var(--muted)">条件未設定</span>')+'</div>'+
     '<div class="upd">'+(s.upd?'最終更新: '+s.upd:'未取得')+'<span class="click-hint">&#x25BC; チャート</span></div></div>';
 }
 
