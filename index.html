@@ -274,11 +274,10 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
     <div class="chart-panel" id="chartPanel" style="display:none">
       <div class="chart-top">
         <div class="chart-name">&#x1F4C9; <span id="ctitle">&#x30C1;&#x30E3;&#x30FC;&#x30C8;</span></div>
-        <div class="rng-row">
-          <button class="rbtn active" id="r1mo" onclick="setR('1mo')">1M</button>
-          <button class="rbtn" id="r3mo" onclick="setR('3mo')">3M</button>
-          <button class="rbtn" id="r6mo" onclick="setR('6mo')">6M</button>
-          <button class="rbtn" id="r1y" onclick="setR('1y')">1Y</button>
+       <div class="rng-row">
+          <button class="rbtn active" id="rdaily" onclick="setR('daily')">日足</button>
+          <button class="rbtn" id="rweekly" onclick="setR('weekly')">週足</button>
+          <button class="rbtn" id="rmonthly" onclick="setR('monthly')">月足</button>
         </div>
       </div>
       <div class="ct-row">
