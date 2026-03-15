@@ -670,6 +670,8 @@ function drawCandle(code,d,box){
   m5.setData(raw.map(function(x,i){if(i<4)return null;var s=0;for(var j=i-4;j<=i;j++)s+=cls[j];return{time:x.time,value:s/5};}).filter(Boolean));
   var m25=lwC.addLineSeries({color:'rgba(179,136,255,.8)',lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
   m25.setData(raw.map(function(x,i){if(i<24)return null;var s=0;for(var j=i-24;j<=i;j++)s+=cls[j];return{time:x.time,value:s/25};}).filter(Boolean));
+  var m75=lwC.addLineSeries({color:'rgba(255,165,0,.8)',lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+  m75.setData(raw.map(function(x,i){if(i<74)return null;var s=0;for(var j=i-74;j<=i;j++)s+=cls[j];return{time:x.time,value:s/75};}).filter(Boolean));
   if(s&&s.tp)cs.createPriceLine({price:s.tp,color:'rgba(255,224,102,.9)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'目標'});
   var mkrs=(D.trades||[]).filter(function(t){return t.code===code;})
     .map(function(t){
