@@ -677,7 +677,6 @@ function drawCandle(code,d,box){
         text:TL[t.type]+' '+t.price.toLocaleString()+'円×'+t.qty};
     }).sort(function(a,b){return a.time.localeCompare(b.time);});
   if(mkrs.length)cs.setMarkers(mkrs);
-  lwC.timeScale().fitContent();
   var ro=new ResizeObserver(function(){if(lwC)lwC.applyOptions({width:box.offsetWidth});});ro.observe(box);
 }
 function mkLbls(d){return d.ts.map(function(t){var dt=new Date(t*1000);return(dt.getMonth()+1)+'/'+(dt.getDate());});}
