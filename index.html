@@ -649,7 +649,7 @@ function drawCandle(code,d,box){
     layout:{background:{color:'#060a12'},textColor:'#7a9ab8'},
     grid:{vertLines:{color:'rgba(28,46,72,.5)'},horzLines:{color:'rgba(28,46,72,.5)'}},
     crosshair:{mode:LightweightCharts.CrosshairMode.Normal},
-   rightPriceScale:{borderColor:'#1c2e48'},timeScale:{borderColor:'#1c2e48',timeVisible:false,barSpacing:12},
+   rightPriceScale:{borderColor:'#1c2e48'},timeScale:{borderColor:'#1c2e48',timeVisible:false,barSpacing:20},
     localization:{priceFormatter:function(p){return Math.round(p).toLocaleString()+'円';}}
   });
   var cs=lwC.addCandlestickSeries({upColor:'#00ff9d',downColor:'#ff4d6d',borderUpColor:'#00ff9d',borderDownColor:'#ff4d6d',wickUpColor:'#00ff9d',wickDownColor:'#ff4d6d'});
