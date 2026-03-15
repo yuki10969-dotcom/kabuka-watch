@@ -604,7 +604,7 @@ function clickCard(c){
   setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
 function setR(r){
-  curRng=r;['1mo','3mo','6mo','1y'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x===r);});
+  curRng=r;['daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x===r);});
   if(selCode)loadChart(selCode,r);
 }
 function setCT(t){
