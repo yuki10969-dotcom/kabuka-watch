@@ -1430,7 +1430,47 @@ function openGlossary(){
     </div>
     <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
       <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">🕯 ローソク足とは</div>
-      <div style="font-size:12px;color:#94a3b8;line-height:1.7;">1本のローソクで「始値・高値・安値・終値」の4つを表します。<br>🟢 緑（陽線）：終値 > 始値 → その日上がった<br>🔴 赤（陰線）：終値 < 始値 → その日下がった<br>上下に伸びるひげは、その日の高値・安値を示します。</div>
+     <div style="font-size:12px;color:#94a3b8;line-height:1.7;">1本のローソクで「始値・高値・安値・終値」の4つを表します。</div>
+      <div style="display:flex;gap:16px;justify-content:center;margin:14px 0;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:#00ff9d;font-weight:700;margin-bottom:6px;">🟢 陽線（上昇）</div>
+          <svg width="80" height="160" viewBox="0 0 80 160">
+            <line x1="40" y1="10" x2="40" y2="40" stroke="#00ff9d" stroke-width="2"/>
+            <rect x="20" y="40" width="40" height="70" fill="#00ff9d" rx="2"/>
+            <line x1="40" y1="110" x2="40" y2="145" stroke="#00ff9d" stroke-width="2"/>
+            <text x="68" y="14" fill="#94a3b8" font-size="9" text-anchor="start">高値</text>
+            <line x1="42" y1="10" x2="65" y2="10" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2"/>
+            <text x="68" y="44" fill="#e2e8f0" font-size="9" text-anchor="start">終値</text>
+            <line x1="60" y1="40" x2="65" y2="40" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2"/>
+            <text x="68" y="114" fill="#e2e8f0" font-size="9" text-anchor="start">始値</text>
+            <line x1="60" y1="110" x2="65" y2="110" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2"/>
+            <text x="68" y="149" fill="#94a3b8" font-size="9" text-anchor="start">安値</text>
+            <line x1="42" y1="145" x2="65" y2="145" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2"/>
+          </svg>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:#ff4d6d;font-weight:700;margin-bottom:6px;">🔴 陰線（下落）</div>
+          <svg width="80" height="160" viewBox="0 0 80 160">
+            <line x1="40" y1="10" x2="40" y2="40" stroke="#ff4d6d" stroke-width="2"/>
+            <rect x="20" y="40" width="40" height="70" fill="#ff4d6d" rx="2"/>
+            <line x1="40" y1="110" x2="40" y2="145" stroke="#ff4d6d" stroke-width="2"/>
+            <text x="68" y="14" fill="#94a3b8" font-size="9" text-anchor="start">高値</text>
+            <line x1="42" y1="10" x2="65" y2="10" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2"/>
+            <text x="68" y="44" fill="#e2e8f0" font-size="9" text-anchor="start">始値</text>
+            <line x1="60" y1="40" x2="65" y2="40" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2"/>
+            <text x="68" y="114" fill="#e2e8f0" font-size="9" text-anchor="start">終値</text>
+            <line x1="60" y1="110" x2="65" y2="110" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="2"/>
+            <text x="68" y="149" fill="#94a3b8" font-size="9" text-anchor="start">安値</text>
+            <line x1="42" y1="145" x2="65" y2="145" stroke="#94a3b8" stroke-width="1" stroke-dasharray="2"/>
+          </svg>
+        </div>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;line-height:1.8;background:rgba(0,0,0,.2);border-radius:8px;padding:10px;">
+        📌 <strong style="color:#e2e8f0;">胴体（ボディ）</strong>：始値と終値の間。大きいほど値動きが激しい。<br>
+        📌 <strong style="color:#e2e8f0;">ひげ（上下の線）</strong>：その日の高値・安値まで伸びた線。<br>
+        📌 <strong style="color:#00ff9d;">緑（陽線）</strong>：終値 ＞ 始値 → 上がって終わった日<br>
+        📌 <strong style="color:#ff4d6d;">赤（陰線）</strong>：終値 ＜ 始値 → 下がって終わった日
+      </div>
     </div>
     <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px;">
       <div style="font-size:11px;font-weight:700;color:#00e5ff;margin-bottom:6px;">📈 移動平均線（MA）とは</div>
