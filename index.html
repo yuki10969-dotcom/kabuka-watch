@@ -464,7 +464,13 @@ function showResult(code,name,res){
   res.appendChild(div);
 }
 function openM(){
-function openM(){document.getElementById('modal').classList.add('open')}
+function openM(){
+  document.getElementById('mc').value='';
+  document.getElementById('mn').value='';
+  document.getElementById('search-results').innerHTML='';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(function(){document.getElementById('mc').focus();},100);
+}
 function closeM(){
   document.getElementById('modal').classList.remove('open');
   ['mc','mn','mp'].forEach(id=>document.getElementById(id).value='');
