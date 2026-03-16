@@ -1426,6 +1426,61 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 <!-- ===== WALKTHROUGH END ===== -->
+<!-- ボトムナビゲーション -->
+<nav class="bnav" id="bnav">
+  <button class="bnav-item active" id="bn-market" onclick="bnGo('market')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+    <span>マーケット</span>
+  </button>
+  <button class="bnav-item" id="bn-account" onclick="bnGo('account')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+    </svg>
+    <span>口座管理</span>
+  </button>
+  <button class="bnav-item" id="bn-search" onclick="bnGo('search')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <span>銘柄検索</span>
+  </button>
+  <button class="bnav-item" id="bn-menu" onclick="bnGo('menu')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+    <span>メニュー</span>
+  </button>
+</nav>
+
+<div id="bp-menu" style="display:none;position:fixed;inset:0;bottom:60px;background:#060a12;z-index:400;overflow-y:auto;padding:20px;">
+  <div style="font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:20px;">メニュー</div>
+  <div style="display:flex;flex-direction:column;gap:10px;">
+    <button onclick="openGlossary();bnGo('market')" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:left;color:#e2e8f0;cursor:pointer;font-size:14px;">📖 用語解説</button>
+    <a href="/walkthrough.html" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:left;color:#e2e8f0;text-decoration:none;font-size:14px;display:block;">👋 はじめての方はこちら</a>
+    <button onclick="openM();bnGo('market')" style="background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);border-radius:12px;padding:16px;text-align:left;color:var(--cyan);cursor:pointer;font-size:14px;">＋ 銘柄を追加する</button>
+  </div>
+</div>
+
+<script>
+function bnGo(tab){
+  ['market','account','search','menu'].forEach(function(t){
+    document.getElementById('bn-'+t).classList.toggle('active', t===tab);
+  });
+  var menuPage = document.getElementById('bp-menu');
+  if(tab==='menu'){ menuPage.style.display='block'; return; }
+  menuPage.style.display='none';
+  if(tab==='search'){ openM(); bnGo('market'); return; }
+  if(tab==='account'){
+    var tp=document.getElementById('tradePanel');
+    if(tp){ tp.style.display=''; renderT(); tp.scrollIntoView({behavior:'smooth',block:'start'}); }
+    return;
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+
 <script>
 function openGlossary(){
   var el=document.getElementById('glossaryModal');
