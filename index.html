@@ -361,25 +361,21 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 
 <div class="overlay" id="modal">
   <div class="modal">
-    <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-bottom:20px">銘柄を追加</div>
-    <label>証券コード（東証）</label>
-    <input type="text" id="mc" placeholder="例: 285A, 7203, 6758">
-    <label>銘柄名</label>
-    <input type="text" id="mn" placeholder="例: キオクシア">
-    <hr>
-    <label>目標価格（円）—この価格以下で通知</label>
-    <input type="number" id="mp" placeholder="例: 20200">
-    <label>RSI閾値—この値以下で通知（日足・週足）</label>
-    <input type="number" id="mr" value="30">
-    <div class="crow"><input type="checkbox" id="mm" checked><label for="mm">MA5/MA25 ゴールデン・デッドクロスを通知</label></div>
-    <div class="crow"><input type="checkbox" id="mb" checked><label for="mb">PBR割安・割高アラート（1年平均比較）</label></div>
-    <div class="mfoot">
-      <button class="btn bo" onclick="closeM()">キャンセル</button>
-      <button class="btn bc" onclick="addS()">追加する</button>
+    <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-bottom:6px">銘柄検索</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">証券コードまたは銘柄名を入力してください</div>
+    <div style="position:relative">
+      <input type="text" id="mc" placeholder="例: 7203 または トヨタ" oninput="searchStock(this.value)" autocomplete="off" style="padding-right:40px">
+      <div id="search-spin" style="display:none;position:absolute;right:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .6s linear infinite"></div>
+    </div>
+    <div id="search-results" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto"></div>
+    <input type="hidden" id="mn" value="">
+    <input type="hidden" id="mp" value="">
+    <input type="hidden" id="mr" value="30">
+    <div class="mfoot" style="margin-top:16px">
+      <button class="btn bo" onclick="closeM()">閉じる</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
