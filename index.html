@@ -400,7 +400,70 @@ function go(t){
 }
 
 function saveCfg(){D.wh=document.getElementById('cw').value.trim();D.iv=parseInt(document.getElementById('ci').value)||5;D.cd=parseInt(document.getElementById('cc').value)||60;save();toast('✅ 保存しました')}
-
+var _searchTimer=null;
+function searchStock(val){
+  var res=document.getElementById('search-results');
+  var spin=document.getElementById('search-spin');
+  val=val.trim();
+  if(!val){res.innerHTML='';return;}
+  clearTimeout(_searchTimer);
+  spin.style.display='block';
+  _searchTimer=setTimeout(function(){
+    var isCode=/^[0-9]{1,4}[A-Za-z0-9]?$/.test(val);
+    if(isCode){fetchStockInfo(val.toUpperCase(),res,spin);}
+    else{searchByName(val,res,spin);}
+  },400);
+}
+async function fetchStockInfo(code,res,spin){
+  try{
+    var r=await fetch('/api/stock?code='+code+'&interval=1d&range=1mo');
+    var d=await r.json();
+    spin.style.display='none';
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
+    var name=ch&&ch.meta&&(ch.meta.longName||ch.meta.shortName)||'';
+    if(!name){res.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px">銘柄が見つかりませんでした</div>';return;}
+    name=name.replace(/\s*[（(].*?[)）]/g,'').trim();
+    showResult(code,name,res);
+  }catch(e){
+    spin.style.display='none';
+    res.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px">取得に失敗しました</div>';
+  }
+}
+function searchByName(query,res,spin){
+  var dict=[
+    {c:'7203',n:'トヨタ自動車'},{c:'6758',n:'ソニーグループ'},{c:'9984',n:'ソフトバンクグループ'},
+    {c:'6861',n:'キーエンス'},{c:'8306',n:'三菱UFJフィナンシャル'},{c:'9432',n:'NTT'},
+    {c:'6954',n:'ファナック'},{c:'4063',n:'信越化学工業'},{c:'8035',n:'東京エレクトロン'},
+    {c:'4568',n:'第一三共'},{c:'7267',n:'ホンダ'},{c:'6501',n:'日立製作所'},
+    {c:'9433',n:'KDDI'},{c:'8316',n:'三井住友フィナンシャルグループ'},{c:'6902',n:'デンソー'},
+    {c:'4519',n:'中外製薬'},{c:'7741',n:'HOYA'},{c:'4661',n:'オリエンタルランド'},
+    {c:'3382',n:'セブン＆アイ・ホールディングス'},{c:'2914',n:'日本たばこ産業'},
+    {c:'8267',n:'イオン'},{c:'9020',n:'JR東日本'},{c:'9022',n:'JR東海'},
+    {c:'2502',n:'アサヒグループホールディングス'},{c:'4502',n:'武田薬品工業'},
+    {c:'6752',n:'パナソニックホールディングス'},{c:'7011',n:'三菱重工業'},
+    {c:'8801',n:'三井不動産'},{c:'9983',n:'ファーストリテイリング'},{c:'6594',n:'日本電産（ニデック）'},
+    {c:'4911',n:'資生堂'},{c:'6367',n:'ダイキン工業'},{c:'5108',n:'ブリヂストン'},
+    {c:'8002',n:'丸紅'},{c:'8031',n:'三井物産'},{c:'8058',n:'三菱商事'},
+  ];
+  var hits=dict.filter(function(x){return x.n.indexOf(query)!==-1;}).slice(0,5);
+  spin.style.display='none';
+  if(!hits.length){res.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px">見つかりませんでした。証券コードで直接入力してみてください。</div>';return;}
+  res.innerHTML='';
+  hits.forEach(function(x){showResult(x.c,x.n,res);});
+}
+function showResult(code,name,res){
+  var div=document.createElement('div');
+  div.className='sr-item';
+  if(D.stocks[code]){
+    div.style.opacity='.5';
+    div.innerHTML='<div><div class="sr-code">'+code+'</div><div class="sr-name">'+name+'</div></div><div class="sr-add">登録済み</div>';
+  }else{
+    div.innerHTML='<div><div class="sr-code">'+code+'</div><div class="sr-name">'+name+'</div></div><div class="sr-add">＋ 追加</div>';
+    div.onclick=function(){document.getElementById('mn').value=name;document.getElementById('mc').value=code;addS();};
+  }
+  res.appendChild(div);
+}
+function openM(){
 function openM(){document.getElementById('modal').classList.add('open')}
 function closeM(){
   document.getElementById('modal').classList.remove('open');
