@@ -758,8 +758,8 @@ function setCT(t){
 function mavg(a,n){return a.map(function(_,i){if(i<n-1)return null;var s=0;for(var j=i-n+1;j<=i;j++)s+=a[j];return s/n;});}
 async function loadChart(code,r){
   try{
-   var intervalMap={daily:'1d',weekly:'1wk',monthly:'1mo'};
-    var rangeMap={daily:'1y',weekly:'3y',monthly:'10y'};
+   var intervalMap={'5m':'5m','15m':'15m','1h':'60m',daily:'1d',weekly:'1wk',monthly:'1mo'};
+    var rangeMap={'5m':'5d','15m':'1mo','1h':'3mo',daily:'1y',weekly:'3y',monthly:'10y'};
     var url='/api/stock?code='+code+'&interval='+(intervalMap[r]||'1d')+'&range='+(rangeMap[r]||'1y');
     var res=await fetch(url),d=await res.json();
     var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
