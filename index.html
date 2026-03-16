@@ -803,7 +803,7 @@ function drawCandle(code,d,box){
   var raw=[],seen={};
   for(var i=0;i<d.ts.length;i++){
     if(d.op[i]!=null&&d.hi[i]!=null&&d.lo[i]!=null&&d.cl[i]!=null){
-      var ds=toDS(d.ts[i]);if(!seen[ds]){seen[ds]=true;raw.push({time:ds,open:d.op[i],high:d.hi[i],low:d.lo[i],close:d.cl[i]});}
+      var ds=(curRng==='5m'||curRng==='15m'||curRng==='1h')?d.ts[i]:toDS(d.ts[i]);if(!seen[ds]){seen[ds]=true;raw.push({time:ds,open:d.op[i],high:d.hi[i],low:d.lo[i],close:d.cl[i]});}
     }
   }
   cs.setData(raw);
