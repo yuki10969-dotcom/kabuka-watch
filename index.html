@@ -285,13 +285,18 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
   <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding:8px 0" id="nxt"></div>
     <div class="grid" id="grid"></div>
     <div class="chart-panel" id="chartPanel" style="display:none">
-      <div class="chart-top">
-        <div class="chart-name">&#x1F4C9; <span id="ctitle">&#x30C1;&#x30E3;&#x30FC;&#x30C8;</span></div>
-       <div class="rng-row">
+      <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:0;z-index:10;">
+        <button onclick="closeChartPanel()" style="background:transparent;border:none;color:var(--cyan);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding:4px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>戻る</button>
+        <div style="font-size:15px;font-weight:900;color:var(--text);flex:1" id="ctitle">チャート</div>
+        <div class="rng-row">
           <button class="rbtn active" id="rdaily" onclick="setR('daily')">日足</button>
           <button class="rbtn" id="rweekly" onclick="setR('weekly')">週足</button>
           <button class="rbtn" id="rmonthly" onclick="setR('monthly')">月足</button>
         </div>
+      </div>
+      <div style="padding:16px">
+      <div class="chart-top">
+        <div class="chart-name"><span></span></div>
       </div>
       <div class="ct-row">
         <div class="ctab yact" id="ct-candle" onclick="setCT('candle')">&#x1F4CA; &#x30ED;&#x30FC;&#x30BD;&#x30AF;&#x8DB3;</div>
