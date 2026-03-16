@@ -448,7 +448,7 @@ function card(c,i){
   (s.alts||[]).forEach(a=>tags.push('<span class="tag t-fire">🔔 '+a+'</span>'));
   return '<div class="card '+(s.alts?.length?'fired':'')+'" onclick="clickCard(\''+c+'\')" style="animation-delay:'+i*.05+'s">'+
     '<div class="card-head"><div><div class="code">'+c+'</div><div class="cname">'+s.name+'</div></div>'+
-    '<div class="acts"><div class="ibtn" onclick="one(\''+c+'\')" title="更新">🔄</div>'+
+    '<div class="acts"><div class="ibtn" onclick="one(\''+c+'\')" title="更新"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>'+
     '<div class="ibtn del" onclick="delS(\''+c+'\')" title="削除">✕</div></div></div>'+
   '<div class="prow"><div class="pmain">'+ps+'</div>'+ch+'</div>'+
     '<div class="upd">'+(s.upd?'最終更新: '+s.upd:'未取得')+'<span class="click-hint">&#x25BC; チャート</span></div></div>';
