@@ -1402,6 +1402,12 @@ document.addEventListener('DOMContentLoaded', function(){
 // ===== WALKTHROUGH END =====
 
 render();
+// 銘柄があれば自動でall()を実行して株価を取得＆定期更新開始
+if(Object.keys(D.stocks||{}).length){
+  all();
+  tmr=setInterval(all,(D.iv||5)*60000);
+  setSt('on','監視中');
+}
 </script>
 
 <script>
