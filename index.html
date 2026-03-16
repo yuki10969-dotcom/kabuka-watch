@@ -1261,11 +1261,6 @@ function drawSAR(code, d, box) {
 
     if(s&&s.tp)cs.createPriceLine({price:s.tp,color:'rgba(255,224,102,.9)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'目標'});
     lwC.timeScale().fitContent();
-    // 分足の場合は全データを表示するよう調整
-    if(curRng==='5m'||curRng==='15m'||curRng==='1h'){
-      var total=raw.length;
-      lwC.timeScale().setVisibleLogicalRange({from:0,to:total-1});
-    }
     var ro=new ResizeObserver(function(){if(lwC)lwC.applyOptions({width:box.offsetWidth});});
     ro.observe(box);
   } catch(e){
