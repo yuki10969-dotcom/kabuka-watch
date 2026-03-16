@@ -670,9 +670,17 @@ function toast(msg,err=0,col=null){
 
 
 var selCode=null,curRng='daily',curCT='candle',lwC=null,chartMC=null,CD={};
+function closeChartPanel(){
+  document.getElementById('chartPanel').style.display='none';
+  document.getElementById('bnav').style.display='flex';
+  document.body.style.overflow='';
+  killCharts();
+}
 function clickCard(c){
   selCode=c;render();
   var panel=document.getElementById('chartPanel');panel.style.display='';
+  document.getElementById('bnav').style.display='none';
+  document.body.style.overflow='hidden';
   var s=D.stocks[c];
   document.getElementById('ctitle').textContent=(s?s.name:'')+' ('+c+')';
   loadChart(c,curRng);
