@@ -452,7 +452,19 @@ function searchByName(query,res,spin){
     {c:'4911',n:'資生堂'},{c:'6367',n:'ダイキン工業'},{c:'5108',n:'ブリヂストン'},
     {c:'8002',n:'丸紅'},{c:'8031',n:'三井物産'},{c:'8058',n:'三菱商事'},
   ];
-  var hits=dict.filter(function(x){return x.n.indexOf(query)!==-1;}).slice(0,5);
+var q=query.replace(/\s/g,'').toLowerCase();
+  var scored=dict.map(function(x){
+    var name=x.n.replace(/\s/g,'');
+    var score=0;
+    if(name===query) score=10;
+    else if(name.startsWith(query)) score=3;
+    else if(name.indexOf(query)!==-1) score=1;
+    else if(x.c.startsWith(query.toUpperCase())) score=2;
+    return {c:x.c,n:x.n,score:score};
+  }).filter(function(x){return x.score>0;})
+    .sort(function(a,b){return b.score-a.score;})
+    .slice(0,8);
+  var hits=scored;
   spin.style.display='none';
   if(!hits.length){res.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px">見つかりませんでした。証券コードで直接入力してみてください。</div>';return;}
   res.innerHTML='';
