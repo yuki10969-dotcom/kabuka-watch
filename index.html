@@ -414,20 +414,21 @@ function searchStock(val){
     else{searchByName(val,res,spin);}
   },400);
 }
-async function fetchStockInfo(code,res,spin){
-  try{
-    var r=await fetch('/api/stock?code='+code+'&interval=1d&range=1mo');
-    var d=await r.json();
+function fetchStockInfo(code,res,spin){
+  fetch('/api/stock?code='+code+'&interval=1d&range=1mo')
+  .then(function(r){return r.json();})
+  .then(function(d){
     spin.style.display='none';
     var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
     var name=ch&&ch.meta&&(ch.meta.longName||ch.meta.shortName)||'';
     if(!name){res.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px">銘柄が見つかりませんでした</div>';return;}
     name=name.replace(/\s*[（(].*?[)）]/g,'').trim();
     showResult(code,name,res);
-  }catch(e){
+  })
+  .catch(function(){
     spin.style.display='none';
     res.innerHTML='<div style="color:var(--muted);font-size:12px;padding:12px">取得に失敗しました</div>';
-  }
+  });
 }
 function searchByName(query,res,spin){
   var dict=[
