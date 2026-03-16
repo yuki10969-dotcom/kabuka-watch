@@ -759,6 +759,9 @@ function drawCandle(code,d,box){
     var ms=lwC.addLineSeries({color:maColors[idx],lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
     ms.setData(raw.map(function(x,i){if(i<n-1)return null;var sv=0;for(var j=i-(n-1);j<=i;j++)sv+=cls[j];return{time:x.time,value:sv/n};}).filter(Boolean));
  });
+  var maUnit=curRng==='weekly'?'週':curRng==='monthly'?'ヶ月':'日';
+  var maLegend=document.getElementById('maLegend');
+  if(maLegend){maLegend.innerHTML=maPeriods.map(function(n,i){return '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;font-size:11px;font-weight:700;"><span style="display:inline-block;width:20px;height:2px;background:'+maColors[i]+';border-radius:2px;"></span><span style="color:'+maColors[i]+'">'+(n+maUnit)+'</span></span>';}).join('');}
   if(s&&s.tp)cs.createPriceLine({price:s.tp,color:'rgba(255,224,102,.9)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'目標'});
   var mkrs=(D.trades||[]).filter(function(t){return t.code===code;})
     .map(function(t){
