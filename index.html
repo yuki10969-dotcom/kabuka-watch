@@ -1260,7 +1260,16 @@ function drawSAR(code, d, box) {
     if(mkrs.length)cs.setMarkers(mkrs);
 
     if(s&&s.tp)cs.createPriceLine({price:s.tp,color:'rgba(255,224,102,.9)',lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'目標'});
-    lwC.timeScale().fitContent();
+  lwC.timeScale().fitContent();
+    if(curRng==='5m'||curRng==='15m'||curRng==='1h'){
+      setTimeout(function(){
+        if(lwC&&raw.length>0){
+          var lastTime=raw[raw.length-1].time;
+          var firstTime=raw[0].time;
+          lwC.timeScale().setVisibleRange({from:firstTime,to:lastTime});
+        }
+      },50);
+    }
     var ro=new ResizeObserver(function(){if(lwC)lwC.applyOptions({width:box.offsetWidth});});
     ro.observe(box);
   } catch(e){
