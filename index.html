@@ -745,7 +745,7 @@ function clickCard(c){
   setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
 function setR(r){
-  curRng=r;['daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x===r);});
+ curRng=r;['5m','15m','1h','daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x===r);});
   if(selCode)loadChart(selCode,r);
 }
 function setCT(t){
