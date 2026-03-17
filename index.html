@@ -543,8 +543,8 @@ function addS(){
   const n=document.getElementById('mn').value.trim();
   const p=document.getElementById('mp').value;
   const r=document.getElementById('mr').value;
-  const ma=document.getElementById('mm').checked;
-  const pb=document.getElementById('mb').checked;
+  const ma=document.getElementById('mm')?document.getElementById('mm').checked:true;
+  const pb=document.getElementById('mb')?document.getElementById('mb').checked:true;
   if(!c||!n){toast('⚠️ 証券コードと銘柄名は必須です',1);return}
   if(D.stocks[c]){toast('⚠️ すでに登録済みです',1);return}
   D.stocks[c]={name:n,tp:p?parseInt(p):null,ri:r?parseInt(r):null,uma:ma,upb:pb,price:null,chg:null,rd:null,rw:null,m5:null,m25:null,pc:null,pa:null,upd:null,alts:[]};
