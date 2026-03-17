@@ -584,8 +584,7 @@ function spSearch(val){
   _spTimer=setTimeout(function(){
     if(isCode){fetchStockInfo(val.toUpperCase(),res,_spDummySpin);}
     else{searchByName(val,res,_spDummySpin);}
-  },400);
-};
+ },400);
 }
 function openM(){
   document.getElementById('mc').value='';
