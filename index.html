@@ -575,15 +575,17 @@ function showResult(code,name,res){
   res.appendChild(div);
 }
 var _spTimer;
+var _spDummySpin={style:{display:''}};
 function spSearch(val){
   var res=document.getElementById('sp-result');
   if(!val||val.trim().length<1){res.innerHTML='';return;}
   var isCode=/^\d{4}$/.test(val.trim());
   clearTimeout(_spTimer);
   _spTimer=setTimeout(function(){
-    if(isCode){fetchStockInfo(val.toUpperCase(),res,null);}
-    else{searchByName(val,res,null);}
+    if(isCode){fetchStockInfo(val.toUpperCase(),res,_spDummySpin);}
+    else{searchByName(val,res,_spDummySpin);}
   },400);
+};
 }
 function openM(){
   document.getElementById('mc').value='';
