@@ -447,7 +447,18 @@ const SK='kbk4';
 let D=load(),tmr=null,ctmr=null,running=false;
 
 function load(){try{return JSON.parse(localStorage.getItem(SK))||def()}catch(e){return def()}}
-function save(){localStorage.setItem(SK,JSON.stringify(D))}
+function save(){
+  try{
+    const s=JSON.stringify(D);
+    localStorage.setItem(SK,s);
+    // 書き込み確認
+    if(!localStorage.getItem(SK)){
+      sessionStorage.setItem(SK,s);
+    }
+  }catch(e){
+    try{sessionStorage.setItem(SK,JSON.stringify(D));}catch(e2){}
+  }
+}
 function def(){return{wh:'',iv:5,cd:60,stocks:{},cds:{}}}
 
 function go(t){
