@@ -452,6 +452,8 @@ function load(){
     return s?JSON.parse(s):def();
   }catch(e){return def()}
 }
+window.addEventListener('pagehide', function(){ save(); });
+window.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') save(); });
 function save(){
   try{
     const s=JSON.stringify(D);
