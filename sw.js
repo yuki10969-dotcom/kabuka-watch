@@ -17,12 +17,10 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
-  // APIリクエストは常にネットワークから
   if(e.request.url.includes('/api/')) {
     e.respondWith(fetch(e.request).catch(() => new Response('{}', {headers:{'Content-Type':'application/json'}})));
     return;
   }
-  // HTMLはNetwork First（失敗時はキャッシュ）
   e.respondWith(
     fetch(e.request)
       .then(res => {
