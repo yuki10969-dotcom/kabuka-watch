@@ -299,17 +299,17 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 
   <div id="dash">
  <div id="mkt-indices" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
-      <div class="idx-card" id="idx-n225" onclick="clickIndex('^N225','日経平均')" ontouchstart="clickIndex('^N225','日経平均')">
+      <div class="idx-card" id="idx-n225" onclick="clickIndex('^N225','日経平均')">
         <div class="idx-name">日経平均</div>
         <div class="idx-price" id="idx-n225-price">--</div>
         <div class="idx-chg" id="idx-n225-chg">--</div>
       </div>
-      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TPX','TOPIX')" ontouchstart="clickIndex('^TPX','TOPIX')">
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TPX','TOPIX')">
         <div class="idx-name">TOPIX</div>
         <div class="idx-price" id="idx-topix-price">--</div>
         <div class="idx-chg" id="idx-topix-chg">--</div>
       </div>
-      <div class="idx-card" id="idx-usdjpy" onclick="clickIndex('USDJPY=X','ドル円')" ontouchstart="clickIndex('USDJPY=X','ドル円')">
+      <div class="idx-card" id="idx-usdjpy" onclick="clickIndex('USDJPY=X','ドル円')">
         <div class="idx-name">ドル円</div>
         <div class="idx-price" id="idx-usdjpy-price">--</div>
         <div class="idx-chg" id="idx-usdjpy-chg">--</div>
@@ -605,7 +605,7 @@ function fetchIndices(){
     {code:'USDJPY=X', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
   ];
   items.forEach(function(item){
-    fetch('/api/stock?code='+encodeURIComponent(item.code)+'&interval=1d&range=5d')
+    fetch('/api/stock?code='+item.code+'&interval=1d&range=5d')
     .then(function(r){return r.json();})
     .then(function(d){
       var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
