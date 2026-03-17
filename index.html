@@ -1720,23 +1720,7 @@ function drawPerfChart(){
   grad.addColorStop(1,'rgba(0,0,0,0)');
   window._perfChartInst=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'資産残高',data:data,borderColor:pnlCol,backgroundColor:grad,borderWidth:2,pointRadius:4,pointBackgroundColor:pnlCol,fill:true,tension:.3}]},options:{responsive:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return Math.round(c.raw).toLocaleString()+'円';}}}},scales:{x:{ticks:{color:'#7a9ab8',font:{size:9},maxRotation:45},grid:{color:'rgba(28,46,72,.5)'}},y:{ticks:{color:'#7a9ab8',font:{size:10},callback:function(v){return (v/10000).toFixed(0)+'万';}},grid:{color:'rgba(28,46,72,.5)'},suggestedMin:Math.min.apply(null,data)*0.99,suggestedMax:Math.max.apply(null,data)*1.01}}}});
 }
-var _curMK='all';
-function setMK(tab){
-  var now=Date.now();
-  _curMK=tab;
-  var allBtn=document.getElementById('mktab-all');
-  var wBtn=document.getElementById('mktab-watch');
-  if(allBtn)allBtn.style.cssText='padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;border:1px solid '+(tab==='all'?'var(--cyan)':'var(--border)')+';background:'+(tab==='all'?'rgba(0,229,255,.12)':'transparent')+';color:'+(tab==='all'?'var(--cyan)':'var(--muted)')+';';
-  if(wBtn)wBtn.style.cssText='padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;border:1px solid '+(tab==='watch'?'#ffe066':'var(--border)')+';background:'+(tab==='watch'?'rgba(255,224,102,.12)':'transparent')+';color:'+(tab==='watch'?'#ffe066':'var(--muted)')+';';
-  render();
-}
-function toggleWatch(code,e){
-  if(e){e.stopPropagation();e.preventDefault();}
-  if(!D.stocks[code])return;
-  D.stocks[code].watch=!D.stocks[code].watch;
-  save();render();
-  toast(D.stocks[code].watch?'⭐ ウォッチに追加':'☆ ウォッチを解除');
-}
+
 function renderT(){
   var trades=D.trades||[];
   var stocks=D.stocks||{};
