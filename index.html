@@ -798,14 +798,22 @@ function drawCandle(code,d,box){
     crosshair:{mode:LightweightCharts.CrosshairMode.Normal},
   rightPriceScale:{borderColor:'#1c2e48'},timeScale:{borderColor:'#1c2e48',timeVisible:(curRng==='5m'||curRng==='15m'||curRng==='1h'),barSpacing:(curRng==='5m'?3:curRng==='15m'?4:curRng==='1h'?5:9)},
     localization:{priceFormatter:function(p){return Math.round(p).toLocaleString()+'円';},timeFormatter:function(t){
-        var d=new Date(t*1000);
-        var h=d.getUTCHours(),mi=d.getUTCMinutes();
-        var mo=d.getUTCMonth()+1,day=d.getUTCDate(),yr=d.getUTCFullYear();
-        if(curRng==='5m'||curRng==='15m'||curRng==='1h'){
-          return mo+'/'+day+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0');
-        }
         var wdays=['日','月','火','水','木','金','土'];
-        return yr+'/'+(mo<10?'0':'')+mo+'/'+(day<10?'0':'')+day+'('+wdays[d.getUTCDay()]+')';
+        if(curRng==='5m'||curRng==='15m'||curRng==='1h'){
+          var d=new Date(t*1000);
+          var h=d.getUTCHours(),mi=d.getUTCMinutes();
+          var mo=d.getUTCMonth()+1,day=d.getUTCDate();
+          return mo+'/'+day+' '+String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0');
+        } else {
+          if(typeof t==='string'){
+            var parts=t.split('-');
+            var yr=parseInt(parts[0]),mo=parseInt(parts[1]),day=parseInt(parts[2]);
+            var dt=new Date(yr+'-'+parts[1]+'-'+parts[2]+'T00:00:00Z');
+            return yr+'/'+(mo<10?'0':'')+mo+'/'+(day<10?'0':'')+day+'('+wdays[dt.getUTCDay()]+')';
+          }
+          var d=new Date(t*1000);
+          return d.getUTCFullYear()+'/'+(d.getUTCMonth()+1)+'/'+d.getUTCDate()+'('+wdays[d.getUTCDay()]+')';
+        }
       }}
   });
   var cs=lwC.addCandlestickSeries({upColor:'#00ff9d',downColor:'#ff4d6d',borderUpColor:'#00ff9d',borderDownColor:'#ff4d6d',wickUpColor:'#00ff9d',wickDownColor:'#ff4d6d'});
