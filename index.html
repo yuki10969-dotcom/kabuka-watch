@@ -1670,11 +1670,82 @@ function bnGo(tab){
 </script>
 
 <script>
-  function setAT(t){
-  ['pos','hist'].forEach(function(x){
-    document.getElementById('attab-'+x).classList.toggle('active',x===t);
-    document.getElementById('atp-'+x).style.display=x===t?'':'none';
+function setAT(t){
+  ['pos','hist','perf'].forEach(function(x){
+    var tb=document.getElementById('attab-'+x);
+    var tp=document.getElementById('atp-'+x);
+    if(tb)tb.classList.toggle('active',x===t);
+    if(tp)tp.style.display=x===t?'':'none';
   });
+  if(t==='perf')drawPerfChart();
+}
+function drawPerfChart(){
+  var trades=D.trades||[];
+  if(!trades.length){
+    document.getElementById('perfStats').innerHTML='<div style="color:var(--muted);font-size:13px;grid-column:span 2;text-align:center;padding:20px">取引履歴がありません</div>';
+    return;
+  }
+  var sorted=[].concat(trades).sort(function(a,b){return a.id-b.id;});
+  var pts=[{date:'開始',bal:D.vtBudget||1000000}];
+  var bal=D.vtBudget||1000000;
+  sorted.forEach(function(t){
+    var amt=t.price*t.qty;
+    if(t.type==='buy'||t.type==='mbuy') bal-=amt;
+    else bal+=amt;
+    var label=t.date||(new Date(t.id)).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
+    pts.push({date:label+'('+t.code+')',bal:bal});
+  });
+  var positions={};
+  sorted.forEach(function(t){
+    if(!positions[t.code])positions[t.code]={qty:0,cost:0};
+    if(t.type==='buy'||t.type==='mbuy'){positions[t.code].qty+=t.qty;positions[t.code].cost+=t.price*t.qty;}
+    else{positions[t.code].qty=Math.max(0,positions[t.code].qty-t.qty);}
+  });
+  var unrealized=0;
+  Object.keys(positions).forEach(function(code){
+    var pos=positions[code];
+    if(pos.qty>0&&D.stocks[code]&&D.stocks[code].price&&pos.qty>0){
+      unrealized+=(D.stocks[code].price-(pos.cost/pos.qty))*pos.qty;
+    }
+  });
+  pts.push({date:'現在',bal:bal+unrealized});
+  var labels=pts.map(function(p){return p.date;});
+  var data=pts.map(function(p){return Math.round(p.bal);});
+  var pnl=data[data.length-1]-(D.vtBudget||1000000);
+  var pnlPct=(pnl/(D.vtBudget||1000000)*100).toFixed(2);
+  var pnlCol=pnl>=0?'#00ff9d':'#ff4d6d';
+  document.getElementById('perfStats').innerHTML=
+    '<div class="sbox"><div class="sl">初期資金</div><div class="sv" style="color:var(--cyan)">'+Math.round(D.vtBudget||1000000).toLocaleString()+'円</div></div>'+
+    '<div class="sbox"><div class="sl">現在評価</div><div class="sv" style="color:var(--cyan)">'+data[data.length-1].toLocaleString()+'円</div></div>'+
+    '<div class="sbox"><div class="sl">総損益</div><div class="sv" style="color:'+pnlCol+'">'+(pnl>=0?'+':'')+Math.round(pnl).toLocaleString()+'円</div></div>'+
+    '<div class="sbox"><div class="sl">損益率</div><div class="sv" style="color:'+pnlCol+'">'+(pnl>=0?'+':'')+pnlPct+'%</div></div>';
+  var canvas=document.getElementById('perfChart');
+  if(!canvas)return;
+  canvas.width=canvas.parentElement.offsetWidth-24;
+  canvas.height=200;
+  if(window._perfChartInst){window._perfChartInst.destroy();}
+  var ctx=canvas.getContext('2d');
+  var grad=ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0,pnl>=0?'rgba(0,255,157,.3)':'rgba(255,77,109,.3)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  window._perfChartInst=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'資産残高',data:data,borderColor:pnlCol,backgroundColor:grad,borderWidth:2,pointRadius:4,pointBackgroundColor:pnlCol,fill:true,tension:.3}]},options:{responsive:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return Math.round(c.raw).toLocaleString()+'円';}}}},scales:{x:{ticks:{color:'#7a9ab8',font:{size:9},maxRotation:45},grid:{color:'rgba(28,46,72,.5)'}},y:{ticks:{color:'#7a9ab8',font:{size:10},callback:function(v){return (v/10000).toFixed(0)+'万';}},grid:{color:'rgba(28,46,72,.5)'},suggestedMin:Math.min.apply(null,data)*0.99,suggestedMax:Math.max.apply(null,data)*1.01}}}});
+}
+var _curMK='all';
+function setMK(tab){
+  var now=Date.now();
+  _curMK=tab;
+  var allBtn=document.getElementById('mktab-all');
+  var wBtn=document.getElementById('mktab-watch');
+  if(allBtn)allBtn.style.cssText='padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;border:1px solid '+(tab==='all'?'var(--cyan)':'var(--border)')+';background:'+(tab==='all'?'rgba(0,229,255,.12)':'transparent')+';color:'+(tab==='all'?'var(--cyan)':'var(--muted)')+';';
+  if(wBtn)wBtn.style.cssText='padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;touch-action:manipulation;border:1px solid '+(tab==='watch'?'#ffe066':'var(--border)')+';background:'+(tab==='watch'?'rgba(255,224,102,.12)':'transparent')+';color:'+(tab==='watch'?'#ffe066':'var(--muted)')+';';
+  render();
+}
+function toggleWatch(code,e){
+  if(e){e.stopPropagation();e.preventDefault();}
+  if(!D.stocks[code])return;
+  D.stocks[code].watch=!D.stocks[code].watch;
+  save();render();
+  toast(D.stocks[code].watch?'⭐ ウォッチに追加':'☆ ウォッチを解除');
 }
 function renderT(){
   var trades=D.trades||[];
