@@ -535,7 +535,8 @@ function closeM(){
   document.getElementById('modal').classList.remove('open');
   ['mc','mn','mp'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('mr').value='30';
-  document.getElementById('mm').checked=true;document.getElementById('mb').checked=true;
+ if(document.getElementById('mm'))document.getElementById('mm').checked=true;
+  if(document.getElementById('mb'))document.getElementById('mb').checked=true;
 }
 
 function addS(){
