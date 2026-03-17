@@ -1615,6 +1615,8 @@ document.addEventListener('DOMContentLoaded', function(){
 // ===== WALKTHROUGH END =====
 
 render();
+fetchIndices();
+setInterval(fetchIndices, 5*60*1000);
 // 銘柄があれば自動でall()を実行して株価を取得＆定期更新開始
 if(Object.keys(D.stocks||{}).length){
   all();
