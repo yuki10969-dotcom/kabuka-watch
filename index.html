@@ -620,7 +620,26 @@ function fetchIndices(){
       var priceStr=item.code==='USDJPY=X'?price.toFixed(2)+'円':price>=100?Math.round(price).toLocaleString():price.toFixed(2);
       pEl.textContent=priceStr;
       if(chgPct!=null){var sign=chgPct>=0?'+':'';cEl.textContent=sign+chgPct.toFixed(2)+'%';cEl.className='idx-chg '+(chgPct>=0?'up':'dn');}
-    }).catch(function(){});
+   }).catch(function(){
+      setTimeout(function(){
+        fetch('/api/stock?code='+item.encoded+'&interval=1d&range=5d')
+        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+        .then(function(d){
+          var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
+          if(!ch)return;
+          var m=ch.meta;
+          var price=m.regularMarketPrice;
+          var prev=m.previousClose||m.chartPreviousClose;
+          var chgPct=prev?(price-prev)/prev*100:null;
+          var pEl=document.getElementById(item.priceId);
+          var cEl=document.getElementById(item.chgId);
+          if(!pEl||!cEl)return;
+          var priceStr=item.code==='USDJPY=X'?price.toFixed(2)+'円':price>=100?Math.round(price).toLocaleString():price.toFixed(2);
+          pEl.textContent=priceStr;
+          if(chgPct!=null){var sign=chgPct>=0?'+':'';cEl.textContent=sign+chgPct.toFixed(2)+'%';cEl.className='idx-chg '+(chgPct>=0?'up':'down');}
+        }).catch(function(){});
+      }, 3000);
+    });
   });
 }
 function clickIndex(code,name){
