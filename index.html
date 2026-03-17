@@ -574,6 +574,17 @@ function showResult(code,name,res){
   }
   res.appendChild(div);
 }
+var _spTimer;
+function spSearch(val){
+  var res=document.getElementById('sp-result');
+  if(!val||val.trim().length<1){res.innerHTML='';return;}
+  var isCode=/^\d{4}$/.test(val.trim());
+  clearTimeout(_spTimer);
+  _spTimer=setTimeout(function(){
+    if(isCode){fetchStockInfo(val.toUpperCase(),res,null);}
+    else{searchByName(val,res,null);}
+  },400);
+}
 function openM(){
   document.getElementById('mc').value='';
   document.getElementById('mn').value='';
