@@ -1691,30 +1691,6 @@ document.addEventListener('DOMContentLoaded', function(){
   setInterval(fetchIndices, 5*60*1000);
   if(Object.keys(D.stocks||{}).length){
     all();
-```
-
-に加えて、`});` の直前（1694行目の `});` の前）に以下を追加：
-
----
-
-少し違うアプローチで指示します。GitHubエディタで以下を検索・置換してください。
-
-**検索：**
-```
-document.addEventListener('DOMContentLoaded', function(){
-  render();
-```
-
-**置換後：**
-```
-window.addEventListener('pagehide',function(){
-  var active=['market','account','search','menu'].find(function(t){var el=document.getElementById('bn-'+t);return el&&el.classList.contains('active');});
-  if(active)sessionStorage.setItem('_lastTab',active);
-});
-document.addEventListener('DOMContentLoaded', function(){
-  render();
-  var lastTab=sessionStorage.getItem('_lastTab');
-  if(lastTab&&lastTab!=='market')bnGo(lastTab);
     tmr=setInterval(all,(D.iv||5)*60000);
     setSt('on','監視中');
   }
