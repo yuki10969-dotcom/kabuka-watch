@@ -613,6 +613,13 @@ function addS(){
   if(D.stocks[c]){toast('⚠️ すでに登録済みです',1);return}
   D.stocks[c]={name:n,tp:p?parseInt(p):null,ri:r?parseInt(r):null,uma:ma,upb:pb,price:null,chg:null,rd:null,rw:null,m5:null,m25:null,pc:null,pa:null,upd:null,alts:[]};
 save();closeM();render();toast('✅ '+n+'（'+c+'）を追加しました');one(c);
+var sp=document.getElementById('bp-search');
+if(sp&&sp.style.display!=='none'){
+  document.getElementById('sp-input').value='';
+  document.getElementById('sp-result').innerHTML='';
+  sp.style.display='none';
+  bnGo('market');
+}
 }
 
 function delS(c){
