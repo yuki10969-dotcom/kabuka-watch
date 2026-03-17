@@ -734,6 +734,8 @@ function closeChartPanel(){
 }
 function clickCard(c){
   selCode=c;render();
+  var vp=document.getElementById('vp');
+  if(vp)vp.content='width=device-width, initial-scale=1.0, user-scalable=yes';
   var panel=document.getElementById('chartPanel');panel.style.display='';
   document.getElementById('bnav').style.display='none';
   document.body.style.overflow='hidden';
