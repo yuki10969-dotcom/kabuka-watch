@@ -605,7 +605,7 @@ function fetchIndices(){
     {code:'USDJPY=X', encoded:'USDJPY%3DX', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
   ];
   items.forEach(function(item){
-    fetch('/api/stock?code='+item.code+'&interval=1d&range=5d')
+    fetch('/api/stock?code='+item.encoded+'&interval=1d&range=5d')
     .then(function(r){return r.json();})
     .then(function(d){
       var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
