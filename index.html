@@ -1772,6 +1772,26 @@ function openTradeSheet(){
   var s=D.stocks[code];
   document.getElementById('ts-name').textContent=(s?s.name:'')+' ('+code+')';
   document.getElementById('ts-price').textContent='現在値：'+(s&&s.price!=null?s.price.toLocaleString()+'円':'---');
+  var buys=(D.trades||[]).filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');});
+  var posDiv=document.getElementById('ts-position');
+  if(buys.length>0&&s&&s.price!=null){
+    var holdQty=buys.reduce(function(a,t){return a+t.qty;},0);
+    var holdVal=Math.round(s.price*holdQty);
+    var avgPrice=buys.reduce(function(a,t){return a+t.price*t.qty;},0)/holdQty;
+    var pnl=Math.round((s.price-avgPrice)*holdQty);
+    var pnlPc=(((s.price-avgPrice)/avgPrice)*100).toFixed(2);
+    var chg=s.chg!=null?s.chg:null;
+    var chgStr=chg!=null?(chg>=0?'+':'')+chg.toFixed(2)+'%':'---';
+    var chgColor=chg!=null?(chg>=0?'#00ff9d':'#ff4d6d'):'var(--muted)';
+    document.getElementById('ts-hold-qty').textContent=holdQty.toLocaleString()+'株';
+    document.getElementById('ts-hold-val').textContent=holdVal.toLocaleString()+'円';
+    document.getElementById('ts-hold-chg').textContent=chgStr;
+    document.getElementById('ts-hold-chg').style.color=chgColor;
+    var pnlEl=document.getElementById('ts-hold-pnl');
+    pnlEl.textContent=(pnl>=0?'+':'')+pnl.toLocaleString()+'円 ('+(pnl>=0?'+':'')+pnlPc+'%)';
+    pnlEl.style.color=pnl>=0?'#00ff9d':'#ff4d6d';
+    posDiv.style.display='block';
+  }else{posDiv.style.display='none';}
   document.getElementById('ts-qty').value=100;
   selectTradeType('buy');updateTotal();
   document.getElementById('tradeSheet').style.display='flex';
