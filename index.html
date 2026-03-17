@@ -413,6 +413,16 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
   </div>
 </div>
 
+<div id="bp-search" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:10;overflow-y:auto;padding:12px 12px 80px">
+  <div class="wrap">
+    <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-bottom:6px">銘柄検索・登録</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">証券コードまたは銘柄名を入力してください</div>
+    <div style="position:relative">
+      <input type="text" id="sp-input" placeholder="例: 7203 または トヨタ" oninput="spSearch(this.value)" autocomplete="off" style="width:100%;padding:10px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;box-sizing:border-box">
+    </div>
+    <div id="sp-result" style="margin-top:8px"></div>
+  </div>
+</div>
 <div class="overlay" id="modal">
   <div class="modal">
     <div style="font-size:16px;font-weight:900;color:var(--cyan);margin-bottom:6px">銘柄検索</div>
