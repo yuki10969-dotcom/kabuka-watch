@@ -1664,7 +1664,11 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 // ===== WALKTHROUGH END =====
 
-render();
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', function(){ render(); });
+} else {
+  render();
+}
 if(document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', function(){
     fetchIndices();
