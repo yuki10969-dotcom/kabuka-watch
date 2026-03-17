@@ -845,7 +845,19 @@ function drawCandle(code,d,box){
   if(mkrs.length)cs.setMarkers(mkrs);
   var ro=new ResizeObserver(function(){if(lwC)lwC.applyOptions({width:box.offsetWidth});});ro.observe(box);
 }
-function mkLbls(d){return d.ts.map(function(t){var dt=new Date(t*1000);return(dt.getMonth()+1)+'/'+(dt.getDate());});}
+function mkLbls(d){
+  var isIntraday=(curRng==='5m'||curRng==='15m'||curRng==='1h');
+  return d.ts.map(function(t){
+    var dt;
+    if(isIntraday){
+      dt=new Date(t*1000);
+      return (dt.getUTCMonth()+1)+'/'+(dt.getUTCDate())+' '+String(dt.getUTCHours()).padStart(2,'0')+':'+String(dt.getUTCMinutes()).padStart(2,'0');
+    } else {
+      dt=new Date((t+32400)*1000);
+      return (dt.getUTCMonth()+1)+'/'+(dt.getUTCDate());
+    }
+  });
+}
 function mkLC(ctx,lb,ds,type){
   return new Chart(ctx,{type:'line',data:{labels:lb,datasets:ds},options:{
     responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
