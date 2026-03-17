@@ -1649,6 +1649,38 @@ function bnGo(tab){
 </script>
 
 <script>
+  function setAT(t){
+  ['pos','hist'].forEach(function(x){
+    document.getElementById('attab-'+x).classList.toggle('active',x===t);
+    document.getElementById('atp-'+x).style.display=x===t?'':'none';
+  });
+}
+function renderT(){
+  var trades=D.trades||[];
+  var stocks=D.stocks||{};
+  var buys=trades.filter(function(t){return t.type==='buy'||t.type==='mbuy'||t.type==='short';});
+  var tPnl=0,tCost=0;
+  buys.forEach(function(t){var s=stocks[t.code];var cur=s&&s.price!=null?s.price:null;if(cur!=null){tPnl+=(cur-t.price)*t.qty;tCost+=t.price*t.qty;}});
+  var tPnlPct=tCost>0?tPnl/tCost*100:0;
+  var tVal=(D.vtRemain||0)+tCost+tPnl;
+  var pc2=tPnl>0?'pp':tPnl<0?'np':'zp';
+  var smryHTML='<div class="sbox" style="border-color:rgba(0,229,255,.25)"><div class="sl"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>残り資金</div><div class="sv" style="color:var(--cyan)">'+(D.vtRemain!=null?Math.round(D.vtRemain).toLocaleString():'---')+'円</div></div><div class="sbox" style="border-color:rgba(0,229,255,.25)"><div class="sl"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>総資産</div><div class="sv" style="color:var(--cyan)">'+(D.vtRemain!=null?Math.round(tVal).toLocaleString():'---')+'円</div></div><div class="sbox"><div class="sl"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>含み損益</div><div class="sv '+pc2+'">'+(tPnl>=0?'+':'')+Math.round(tPnl).toLocaleString()+'円</div></div><div class="sbox"><div class="sl"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>損益率</div><div class="sv '+pc2+'">'+(tPnl>=0?'+':'')+tPnlPct.toFixed(2)+'%</div></div><div class="sbox"><div class="sl"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>ポジション数</div><div class="sv" style="color:var(--text)">'+buys.length+'件</div></div>'+(function(){var rp=D.realizedPnl||0;var rpc=rp>0?'pp':rp<0?'np':'zp';return '<div class="sbox" style="border-color:rgba(0,255,157,.15)"><div class="sl"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>確定損益</div><div class="sv '+rpc+'">'+(rp>=0?'+':'')+Math.round(rp).toLocaleString()+'円</div></div>';}());
+  var s2=document.getElementById('tSmry2');if(s2)s2.innerHTML=smryHTML;
+  var s1=document.getElementById('tSmry');if(s1)s1.innerHTML=smryHTML;
+  var TC={buy:'tc-buy',sell:'tc-sell',mbuy:'tc-mbuy',short:'tc-short'};
+  var TL={buy:'現物買い',sell:'現物売り',mbuy:'信用買い',short:'空売り'};
+  var empty='<div style="color:var(--muted);text-align:center;padding:40px 24px;font-size:13px;">取引がありません。銘柄のチャートから「取引」ボタンで注文できます</div>';
+  var header='<div class="pos-header"><div class="pos-hcol">銘柄</div><div class="pos-hcol">現在値<br><span style="font-weight:400;font-size:9px">取得単価</span></div><div class="pos-hcol">評価損益<br><span style="font-weight:400;font-size:9px">損益率</span></div></div>';
+  var posRows=buys.map(function(t){var s=stocks[t.code];var cur=s&&s.price!=null?s.price:null;var pnl=cur!=null?(cur-t.price)*t.qty:null;var pct=cur!=null&&t.price>0?((cur-t.price)/t.price*100):null;var pc=pnl!=null?(pnl>0?'pp':pnl<0?'np':'zp'):'zp';return '<div class="pos-row" onclick="clickCard(\''+t.code+'\')"><div class="pos-row-left"><div class="pos-code">'+t.code+'</div><div class="pos-name">'+(s?s.name:t.code)+'</div><div style="font-size:9px;color:var(--muted);margin-top:1px;">'+t.qty+'株</div></div><div class="pos-row-mid"><div class="pos-cur">'+(cur!=null?cur.toLocaleString()+'円':'---')+'</div><div class="pos-acq">'+t.price.toLocaleString()+'円</div></div><div class="pos-row-right"><div class="pos-pnl '+pc+'">'+(pnl!=null?(pnl>=0?'+':'')+Math.round(pnl).toLocaleString()+'円':'---')+'</div><div class="pos-pct '+pc+'">'+(pct!=null?(pct>=0?'+':'')+pct.toFixed(2)+'%':'---')+'</div></div><span class="pos-arrow">›</span></div>';});
+  var posHTML=buys.length?header+posRows.join(''):empty;
+  var pb2=document.getElementById('tPosBody2');if(pb2)pb2.innerHTML=posHTML;
+  var pb1=document.getElementById('tPosBody');if(pb1)pb1.innerHTML=posHTML;
+  var histRows=trades.slice().reverse().map(function(t){var nm=stocks[t.code]?(' <span style="font-size:10px;color:var(--muted)">'+stocks[t.code].name+'</span>'):'';return '<tr><td>'+t.date+'</td><td><span class="'+TC[t.type]+'">'+TL[t.type]+'</span></td><td>'+t.code+nm+'</td><td>'+t.price.toLocaleString()+'円</td><td>'+t.qty+'株</td><td><button class="td-btn" onclick="delTrade('+t.id+')">&#x2715;</button></td></tr>';});
+  var histHTML=histRows.length?histRows.join(''):'<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:20px;">取引履歴がありません</td></tr>';
+  var hb2=document.getElementById('tHistBody2');if(hb2)hb2.innerHTML=histHTML;
+  var hb1=document.getElementById('tHistBody');if(hb1)hb1.innerHTML=histHTML;
+}
+function openGlossary(){
 function openGlossary(){
   var el=document.getElementById('glossaryModal');
   if(el){el.style.display='flex';return;}
