@@ -1648,7 +1648,7 @@ function bnGo(tab){
   menuPage.style.display='none';
   accountPage.style.display='none';
   if(tab==='menu'){ menuPage.style.display='block'; return; }
-  if(tab==='search'){ openM(); bnGo('market'); return; }
+if(tab==='search'){ openM(); return; }
   if(tab==='account'){
     accountPage.style.display='block';
     renderT();
