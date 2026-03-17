@@ -17,7 +17,7 @@ h<!DOCTYPE html>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;min-height:100vh}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 20px 80px}@media(max-width:480px){.wrap{padding:12px 12px 80px}}
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:16px 14px 80px}@media(max-width:430px){.wrap{padding:10px 10px 80px}}
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border)}@media(max-width:480px){.header{margin-bottom:12px;padding-bottom:10px}}
 .logo{display:flex;align-items:center;gap:14px}
 .logo-icon{width:50px;height:50px;background:linear-gradient(135deg,var(--cyan),var(--green));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 24px rgba(0,229,255,.3)}
@@ -33,7 +33,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .tab.active{background:var(--panel);border-color:var(--cyan);color:var(--cyan)}
 .tab:hover:not(.active){color:var(--text);border-color:var(--border)}
 .ctrl{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}@media(max-width:480px){.grid{grid-template-columns:1fr;gap:8px}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px}
 .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .3s;animation:up .4s ease both;position:relative;overflow:hidden}@media(max-width:480px){.card{padding:14px;border-radius:12px}.pmain{font-size:22px}.code{font-size:16px}}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--green));opacity:0;transition:opacity .3s}
 .card:hover{border-color:rgba(0,229,255,.3);transform:translateY(-2px)}
