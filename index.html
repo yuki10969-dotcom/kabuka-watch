@@ -298,7 +298,24 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 
 
   <div id="dash">
- <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding:8px 0" id="nxt"></div>
+ <div id="mkt-indices" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+      <div class="idx-card" id="idx-n225" onclick="clickIndex('^N225','日経平均')" ontouchstart="clickIndex('^N225','日経平均')">
+        <div class="idx-name">日経平均</div>
+        <div class="idx-price" id="idx-n225-price">--</div>
+        <div class="idx-chg" id="idx-n225-chg">--</div>
+      </div>
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TPX','TOPIX')" ontouchstart="clickIndex('^TPX','TOPIX')">
+        <div class="idx-name">TOPIX</div>
+        <div class="idx-price" id="idx-topix-price">--</div>
+        <div class="idx-chg" id="idx-topix-chg">--</div>
+      </div>
+      <div class="idx-card" id="idx-usdjpy" onclick="clickIndex('USDJPY=X','ドル円')" ontouchstart="clickIndex('USDJPY=X','ドル円')">
+        <div class="idx-name">ドル円</div>
+        <div class="idx-price" id="idx-usdjpy-price">--</div>
+        <div class="idx-chg" id="idx-usdjpy-chg">--</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;padding:8px 0" id="nxt"></div>
     <div class="grid" id="grid"></div>
     <div class="chart-panel" id="chartPanel" style="display:none">
       <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:0;z-index:10;">
