@@ -606,7 +606,7 @@ function fetchIndices(){
   ];
   items.forEach(function(item){
     fetch('/api/stock?code='+item.encoded+'&interval=1d&range=5d')
-    .then(function(r){return r.json();})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
     .then(function(d){
       var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
       if(!ch)return;
