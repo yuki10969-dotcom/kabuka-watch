@@ -1664,26 +1664,16 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 // ===== WALKTHROUGH END =====
 
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', function(){ render(); });
-} else {
+document.addEventListener('DOMContentLoaded', function(){
   render();
-}
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', function(){
-    fetchIndices();
-    setInterval(fetchIndices, 5*60*1000);
-  });
-} else {
   fetchIndices();
   setInterval(fetchIndices, 5*60*1000);
-}
-// 銘柄があれば自動でall()を実行して株価を取得＆定期更新開始
-if(Object.keys(D.stocks||{}).length){
-  all();
-  tmr=setInterval(all,(D.iv||5)*60000);
-  setSt('on','監視中');
-}
+  if(Object.keys(D.stocks||{}).length){
+    all();
+    tmr=setInterval(all,(D.iv||5)*60000);
+    setSt('on','監視中');
+  }
+});
 </script>
 
 <script>
