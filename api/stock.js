@@ -17,7 +17,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'code is required' });
   }
 
-  const ticker = code.toUpperCase() + '.T';
+  // 指数・為替は.Tを付けない（^N225, ^TPX, USDJPY=Xなど）
+  const isSpecial = code.startsWith('^') || code.includes('=') || code.includes('.');
+  const ticker = isSpecial ? code : code.toUpperCase() + '.T';
 
   try {
     let url;
