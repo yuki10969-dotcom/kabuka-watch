@@ -600,9 +600,9 @@ function delS(c){
 
 function fetchIndices(){
   var items=[
-    {code:'^N225', priceId:'idx-n225-price', chgId:'idx-n225-chg'},
-    {code:'^TPX',  priceId:'idx-topix-price', chgId:'idx-topix-chg'},
-    {code:'USDJPY=X', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
+    {code:'^N225', encoded:'%5EN225', priceId:'idx-n225-price', chgId:'idx-n225-chg'},
+    {code:'^TPX',  encoded:'%5ETPX', priceId:'idx-topix-price', chgId:'idx-topix-chg'},
+    {code:'USDJPY=X', encoded:'USDJPY%3DX', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
   ];
   items.forEach(function(item){
     fetch('/api/stock?code='+item.code+'&interval=1d&range=5d')
