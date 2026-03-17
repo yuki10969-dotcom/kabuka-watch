@@ -1619,9 +1619,11 @@ function bnGo(tab){
   ['market','account','search','menu'].forEach(function(t){
     document.getElementById('bn-'+t).classList.toggle('active', t===tab);
   });
-  var menuPage = document.getElementById('bp-menu');
-  if(tab==='menu'){ menuPage.style.display='block'; return; }
+  var menuPage=document.getElementById('bp-menu');
+  var accountPage=document.getElementById('bp-account');
   menuPage.style.display='none';
+  accountPage.style.display='none';
+  if(tab==='menu'){ menuPage.style.display='block'; return; }
   if(tab==='search'){ openM(); bnGo('market'); return; }
   if(tab==='account'){
     accountPage.style.display='block';
