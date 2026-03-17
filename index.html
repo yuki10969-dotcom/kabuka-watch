@@ -289,13 +289,19 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <button onclick="closeChartPanel()" style="background:transparent;border:none;color:var(--cyan);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding:4px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>戻る</button>
        <div style="font-size:15px;font-weight:900;color:var(--text);flex:1" id="ctitle">チャート</div>
         <button onclick="openTradeSheet()" style="background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3);color:var(--cyan);border-radius:8px;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;margin-right:8px;display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>取引</button>
-        <div class="rng-row">
-        <button class="rbtn" id="r5m" onclick="setR('5m')">5分</button>
-          <button class="rbtn" id="r15m" onclick="setR('15m')">15分</button>
-          <button class="rbtn" id="r1h" onclick="setR('1h')">1時間</button>
-          <button class="rbtn active" id="rdaily" onclick="setR('daily')">日足</button>
-          <button class="rbtn" id="rweekly" onclick="setR('weekly')">週足</button>
-          <button class="rbtn" id="rmonthly" onclick="setR('monthly')">月足</button>
+       <div class="rng-dropdown" id="rngDropdown">
+          <button class="rng-sel" id="rngSelBtn" onclick="toggleRngMenu()">
+            <span id="rngLabel">日足</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="rng-menu" id="rngMenu">
+            <div class="rng-item" onclick="setR('5m')">5分足</div>
+            <div class="rng-item" onclick="setR('15m')">15分足</div>
+            <div class="rng-item" onclick="setR('1h')">1時間足</div>
+            <div class="rng-item active" onclick="setR('daily')">日足</div>
+            <div class="rng-item" onclick="setR('weekly')">週足</div>
+            <div class="rng-item" onclick="setR('monthly')">月足</div>
+          </div>
         </div>
       </div>
       <div style="padding:16px">
