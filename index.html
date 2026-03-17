@@ -1629,7 +1629,10 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
+var _bnLastTab=null,_bnLastTime=0;
 function bnGo(tab){
+  var now=Date.now();if(tab===_bnLastTab&&now-_bnLastTime<400)return;
+  _bnLastTab=tab;_bnLastTime=now;
   ['market','account','search','menu'].forEach(function(t){
     document.getElementById('bn-'+t).classList.toggle('active', t===tab);
   });
