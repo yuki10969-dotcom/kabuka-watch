@@ -34,7 +34,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .tab:hover:not(.active){color:var(--text);border-color:var(--border)}
 .ctrl{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:20px;transition:all .3s;animation:up .4s ease both;position:relative;overflow:hidden}@media(max-width:480px){.card{padding:14px;border-radius:12px}.pmain{font-size:22px}.code{font-size:16px}}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .3s;animation:up .4s ease both;position:relative;overflow:hidden}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--green));opacity:0;transition:opacity .3s}
 .card:hover{border-color:rgba(0,229,255,.3);transform:translateY(-2px)}
 .card:hover::before{opacity:1}
@@ -48,7 +48,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .ibtn:hover{border-color:var(--cyan);color:var(--cyan)}
 .ibtn.del:hover{border-color:var(--red);color:var(--red)}
 .prow{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
-.pmain{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700}
+.pmain{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700}
 .pchg{font-family:'JetBrains Mono',monospace;font-size:12px;padding:2px 7px;border-radius:4px;font-weight:600}
 .pchg.up{background:rgba(0,255,157,.15);color:var(--green)}
 .pchg.dn{background:rgba(255,77,109,.15);color:var(--red)}
