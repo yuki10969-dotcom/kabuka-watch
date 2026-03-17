@@ -1624,8 +1624,9 @@ function bnGo(tab){
   menuPage.style.display='none';
   if(tab==='search'){ openM(); bnGo('market'); return; }
   if(tab==='account'){
-    var tp=document.getElementById('tradePanel');
-    if(tp){ tp.style.display=''; renderT(); tp.scrollIntoView({behavior:'smooth',block:'start'}); }
+    accountPage.style.display='block';
+    renderT();
+    window.scrollTo({top:0,behavior:'instant'});
     return;
   }
   window.scrollTo({top:0,behavior:'smooth'});
