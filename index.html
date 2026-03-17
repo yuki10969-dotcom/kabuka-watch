@@ -750,7 +750,7 @@ function setR(r){
 function setCT(t){
   curCT=t;
   document.getElementById('ct-candle').className='ctab'+(t==='candle'?' yact':'');
-  ['price','rsi','ma','bb','macd','sar'].forEach(function(x){document.getElementById('ct-'+x).className='ctab'+(t===x?' active':'');});
+ ['price','rsi','bb','macd','sar'].forEach(function(x){var el=document.getElementById('ct-'+x);if(el)el.className='ctab'+(t===x?' active':'');});
   document.getElementById('bb-opts').style.display=t==='bb'?'flex':'none';
   if(selCode&&CD[selCode])drawChart(selCode);
 }
