@@ -596,6 +596,46 @@ function delS(c){
   delete D.stocks[c];save();render();toast('🗑️ 削除しました',0,'#ff4d6d');
 }
 
+function fetchIndices(){
+  var items=[
+    {code:'^N225', priceId:'idx-n225-price', chgId:'idx-n225-chg'},
+    {code:'^TPX',  priceId:'idx-topix-price', chgId:'idx-topix-chg'},
+    {code:'USDJPY=X', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
+  ];
+  items.forEach(function(item){
+    fetch('/api/stock?code='+encodeURIComponent(item.code)+'&interval=1d&range=5d')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
+      if(!ch)return;
+      var m=ch.meta;
+      var price=m.regularMarketPrice;
+      var prev=m.previousClose||m.chartPreviousClose;
+      var chgPct=prev?(price-prev)/prev*100:null;
+      var pEl=document.getElementById(item.priceId);
+      var cEl=document.getElementById(item.chgId);
+      if(!pEl||!cEl)return;
+      var priceStr=item.code==='USDJPY=X'?price.toFixed(2)+'円':price>=100?Math.round(price).toLocaleString():price.toFixed(2);
+      pEl.textContent=priceStr;
+      if(chgPct!=null){var sign=chgPct>=0?'+':'';cEl.textContent=sign+chgPct.toFixed(2)+'%';cEl.className='idx-chg '+(chgPct>=0?'up':'dn');}
+    }).catch(function(){});
+  });
+}
+function clickIndex(code,name){
+  selCode=code;
+  var panel=document.getElementById('chartPanel');panel.style.display='';
+  document.getElementById('bnav').style.display='none';
+  document.body.style.overflow='hidden';
+  document.getElementById('ctitle').textContent=name+' ('+code+')';
+  var vp=document.getElementById('vp');
+  if(vp)vp.content='width=device-width, initial-scale=1.0, user-scalable=yes';
+  curCT='candle';curRng='daily';
+  ['5m','15m','1h','daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x==='daily');});
+  document.getElementById('ct-candle').className='ctab yact';
+  ['price','rsi','bb','macd','sar'].forEach(function(x){var el=document.getElementById('ct-'+x);if(el)el.className='ctab';});
+  loadChart(code,'daily');
+  setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},150);
+}
 function render(){
   const g=document.getElementById('grid');
   const cs=Object.keys(D.stocks);
