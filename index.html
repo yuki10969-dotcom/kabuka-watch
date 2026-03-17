@@ -446,7 +446,12 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 const SK='kbk4';
 let D=load(),tmr=null,ctmr=null,running=false;
 
-function load(){try{return JSON.parse(localStorage.getItem(SK))||def()}catch(e){return def()}}
+function load(){
+  try{
+    const s=localStorage.getItem(SK)||sessionStorage.getItem(SK);
+    return s?JSON.parse(s):def();
+  }catch(e){return def()}
+}
 function save(){
   try{
     const s=JSON.stringify(D);
