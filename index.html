@@ -1752,7 +1752,11 @@ function bnGo(tab){
   menuPage.style.display='none';
   accountPage.style.display='none';
   if(tab==='menu'){ menuPage.style.display='block'; return; }
-if(tab==='search'){ openM(); return; }
+if(tab==='search'){
+  document.getElementById('bp-search').style.display='block';
+  setTimeout(function(){document.getElementById('sp-input').focus();},100);
+  return;
+}
   if(tab==='account'){
     accountPage.style.display='block';
     renderT();
