@@ -2097,5 +2097,34 @@ function submitTradeSheet(){
 }
 document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.target===this)closeTradeSheet();});
 </script>
+  <script>
+(function(){
+  var sy=0,pulling=false;
+  function getActiveTab(){
+    var btns=['market','account','search','menu'];
+    for(var i=0;i<btns.length;i++){
+      var el=document.getElementById('bn-'+btns[i]);
+      if(el&&el.classList.contains('active'))return btns[i];
+    }
+    return 'market';
+  }
+  function refreshCurrentTab(){
+    var tab=getActiveTab();
+    fetchIndices();
+    if(tab==='market'&&typeof all==='function')all();
+    if(tab==='account'&&typeof renderT==='function')renderT();
+  }
+  document.addEventListener('touchstart',function(e){
+    if(window.scrollY===0)sy=e.touches[0].clientY;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(window.scrollY===0&&e.touches[0].clientY-sy>60)pulling=true;
+  },{passive:true});
+  document.addEventListener('touchend',function(){
+    if(pulling){pulling=false;refreshCurrentTab();}
+    sy=0;
+  },{passive:true});
+})();
+</script>
 </body>
 </html>
