@@ -574,13 +574,8 @@ function delS(c){
 
 function render(){
   const g=document.getElementById('grid');
-  var cs=Object.keys(D.stocks);
-  if(typeof _curMK!=='undefined'&&_curMK==='watch') cs=cs.filter(function(code){return D.stocks[code].watch;});
-  if(!cs.length){
-    var isWatch=typeof _curMK!=='undefined'&&_curMK==='watch';
-    g.innerHTML='<div class="empty"><div class="empty-icon">'+(isWatch?'⭐':'🔍')+'</div><div>'+(isWatch?'ウォッチ銘柄がありません<br>カードの☆をタップして追加':'銘柄が登録されていません<br>「銘柄検索」から追加してください')+'</div></div>';
-    return;
-  }
+  const cs=Object.keys(D.stocks);
+  if(!cs.length){g.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div>銘柄が登録されていません<br>「銘柄検索」から追加してください</div></div>';return;}
   g.innerHTML=cs.map((c,i)=>card(c,i)).join('');
 }
 
