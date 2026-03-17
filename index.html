@@ -764,9 +764,25 @@ function clickCard(c){
   setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
 function setR(r){
- curRng=r;['5m','15m','1h','daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x===r);});
+  curRng=r;
+  var labels={'5m':'5分足','15m':'15分足','1h':'1時間足','daily':'日足','weekly':'週足','monthly':'月足'};
+  var lbl=document.getElementById('rngLabel');
+  if(lbl)lbl.textContent=labels[r]||r;
+  var items=document.querySelectorAll('.rng-item');
+  var keys=['5m','15m','1h','daily','weekly','monthly'];
+  items.forEach(function(el,i){el.classList.toggle('active',keys[i]===r);});
+  var dd=document.getElementById('rngDropdown');
+  if(dd)dd.classList.remove('open');
   if(selCode)loadChart(selCode,r);
 }
+function toggleRngMenu(){
+  var dd=document.getElementById('rngDropdown');
+  if(dd)dd.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+  var dd=document.getElementById('rngDropdown');
+  if(dd&&!dd.contains(e.target))dd.classList.remove('open');
+});
 function setCT(t){
   curCT=t;
   document.getElementById('ct-candle').className='ctab'+(t==='candle'?' yact':'');
