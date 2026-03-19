@@ -1682,12 +1682,12 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 // ===== WALKTHROUGH END =====
 
-window.addEventListener('pagehide',function(){var active=['market','account','search','menu'].find(function(t){var el=document.getElementById('bn-'+t);return el&&el.classList.contains('active');});if(active)sessionStorage.setItem('_lastTab',active);});
+window.addEventListener('pagehide',function(){var active=['market','account','search','menu'].find(function(t){var el=document.getElementById('bn-'+t);return el&&el.classList.contains('active');});if(active){try{localStorage.setItem('_lastTab',active);}catch(e){}}});
 document.addEventListener('DOMContentLoaded', function(){
   D=load();
-  var lastTab=sessionStorage.getItem('_lastTab')||'market';
+  var lastTab=localStorage.getItem('_lastTab')||'market';
   render();
-  if(lastTab!=='market')bnGo(lastTab);
+  if(lastTab!=='market')setTimeout(function(){bnGo(lastTab);},50);
   fetchIndices();
   setInterval(fetchIndices, 5*60*1000);
   if(Object.keys(D.stocks||{}).length){
