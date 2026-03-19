@@ -1891,7 +1891,110 @@ function renderT(){
   var hb2=document.getElementById('tHistBody2');if(hb2)hb2.innerHTML=histHTML;
   var hb1=document.getElementById('tHistBody');if(hb1)hb1.innerHTML=histHTML;
 }
+function glTab(t){
+  var modal=document.getElementById('glossaryModal');
+  modal.querySelectorAll('.gl-tab-btn').forEach(function(b){b.style.background='rgba(255,255,255,.05)';b.style.color='#64748b';b.style.borderBottom='2px solid transparent';});
+  modal.querySelectorAll('.gl-tab-pane').forEach(function(p){p.style.display='none';});
+  var btn=modal.querySelector('[data-tab="'+t+'"]');
+  var pane=modal.querySelector('[data-pane="'+t+'"]');
+  if(btn){btn.style.background='rgba(0,229,255,.1)';btn.style.color='#00e5ff';btn.style.borderBottom='2px solid #00e5ff';}
+  if(pane)pane.style.display='block';
+}
 function toggleGlossaryItem(el){
+  var body=el.nextElementSibling;
+  var isOpen=body.style.display==='block';
+  var pane=el.closest('.gl-tab-pane');
+  pane.querySelectorAll('.gl-body').forEach(function(b){b.style.display='none';});
+  pane.querySelectorAll('.gl-arrow').forEach(function(a){a.textContent='▶';});
+  if(!isOpen){body.style.display='block';el.querySelector('.gl-arrow').textContent='▼';}
+}
+function openGlossary(){
+  var old=document.getElementById('glossaryModal');
+  if(old){old.style.display='flex';return;}
+  var ov=document.createElement('div');
+  ov.id='glossaryModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:flex;align-items:flex-end;justify-content:center;';
+  ov.onclick=function(e){if(e.target===ov)ov.style.display='none';};
+  var IC={
+    clock:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    unit:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
+    price:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+    order:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+    candle:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><line x1="8" y1="2" x2="8" y2="5"/><rect x="5" y="5" width="6" height="8" rx="1"/><line x1="8" y1="13" x2="8" y2="16"/><line x1="16" y1="4" x2="16" y2="8"/><rect x="13" y="8" width="6" height="8" rx="1"/><line x1="16" y1="16" x2="16" y2="20"/></svg>',
+    volume:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="14" width="4" height="8" rx="1"/><rect x="9" y="9" width="4" height="13" rx="1"/><rect x="16" y="4" width="4" height="18" rx="1"/></svg>',
+    dividend:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    warning:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    ma:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="2 16 7 8 12 13 17 6 22 10"/></svg>',
+    cross:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="2" y1="17" x2="22" y2="7"/><line x1="2" y1="7" x2="22" y2="17"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>',
+    band:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M2 12 Q7 4 12 12 Q17 20 22 12"/><path d="M2 7 Q7 0 12 7 Q17 14 22 7" stroke-opacity=".5"/><path d="M2 17 Q7 10 12 17 Q17 24 22 17" stroke-opacity=".5"/></svg>',
+    macd:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="2" y1="12" x2="22" y2="12" stroke-opacity=".3"/><polyline points="2 15 6 9 10 14 14 8 18 11 22 9"/></svg>',
+    rsi:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="2" y1="6" x2="22" y2="6" stroke-opacity=".4" stroke-dasharray="3"/><line x1="2" y1="18" x2="22" y2="18" stroke-opacity=".4" stroke-dasharray="3"/><polyline points="2 12 5 7 8 16 11 5 14 17 17 9 22 12"/></svg>',
+    per:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="12" y1="8" x2="12" y2="16"/></svg>',
+    pbr:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="21"/></svg>',
+    calendar:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+    roe:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    report:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+    sector:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>'
+  };
+  var CATS=[
+    {id:'basic',label:'必須',items:[
+      {ic:'clock',t:'東京証券取引所の取引時間',b:'前場：9:00〜11:30<br>後場：12:30〜15:30<br>土日・祝日・年末年始はお休みです。'},
+      {ic:'unit',t:'単元株とは',b:'日本株は通常<b style="color:#00e5ff">100株単位</b>で売買します。株価が1,000円なら最低100株×1,000円＝<b style="color:#00e5ff">10万円</b>が必要です。'},
+      {ic:'price',t:'株価とは何か',b:'企業の株1株あたりの値段です。需要と供給のバランスで常に変動します。業績・景気・ニュースなど様々な要因で動きます。'},
+      {ic:'order',t:'指値・成行注文の違い',b:'<b style="color:#00e5ff">指値（さしね）：</b>価格を指定する注文。有利な価格で取引できる可能性あり。<br><br><b style="color:#00e5ff">成行（なりゆき）：</b>価格を指定せず今すぐ取引。確実に約定するが値段は市場任せ。'},
+      {ic:'candle',t:'ローソク足とは',b:'1本で「始値・高値・安値・終値」の4つを表します。<br><br>• <b style="color:#00ff9d">陽線（緑）</b>：終値＞始値 → 上がって終わった日<br>• <b style="color:#ff4d6d">陰線（赤）</b>：終値＜始値 → 下がって終わった日<br>• ひげ：その日の高値・安値を示す線'},
+      {ic:'volume',t:'出来高とは',b:'その日に売買された株の総数。出来高が多いほど取引が活発で価格の動きに信頼性が増します。'},
+      {ic:'dividend',t:'配当金とは',b:'企業が利益の一部を株主に還元するお金。保有株数×1株あたり配当金が受け取れます。年1〜2回が多いです。'},
+      {ic:'warning',t:'投資の注意点',b:'株式投資には元本割れのリスクがあります。余裕資金で投資し、分散投資を心がけましょう。'}
+    ]},
+    {id:'technical',label:'テクニカル',items:[
+      {ic:'ma',t:'【中級】移動平均線（MA）とは',b:'過去N日間の終値の平均を線で結んだもの。<br><br>• <b style="color:#00ff9d">5日線</b>：短期<br>• <b style="color:#a855f7">25日線</b>：中期<br>• <b style="color:#f97316">75日線</b>：長期<br><br>株価が移動平均線を上回ると上昇トレンドのサイン。'},
+      {ic:'cross',t:'【中級】ゴールデンクロス・デッドクロス',b:'<b style="color:#00ff9d">ゴールデンクロス</b>：短期線が長期線を下から上に突き抜ける → <b style="color:#00ff9d">買いシグナル</b><br><br><b style="color:#ff4d6d">デッドクロス</b>：短期線が長期線を上から下に突き抜ける → <b style="color:#ff4d6d">売りシグナル</b>'},
+      {ic:'band',t:'【中級】ボリンジャーバンドとは',b:'移動平均線を中心に上下に価格変動幅（±σ）を示した帯状の指標。<br><br>• 株価がバンドの外に出ると<b style="color:#00e5ff">反転しやすい</b>とされる<br>• バンドが狭まると大きな値動きの前兆'},
+      {ic:'macd',t:'【上級】MACDとは',b:'2本の移動平均線の差を使ったトレンド系指標。<br><br>• MACDラインがシグナルラインを上抜け → <b style="color:#00ff9d">買いサイン</b><br>• MACDラインがシグナルラインを下抜け → <b style="color:#ff4d6d">売りサイン</b>'},
+      {ic:'rsi',t:'【上級】RSI（相対力指数）とは',b:'買われすぎ・売られすぎを0〜100%で示す指標。<br><br>• <b style="color:#ff4d6d">70%以上</b>：買われすぎ（売りを検討）<br>• <b style="color:#00e5ff">30%以下</b>：売られすぎ（買いを検討）<br><br>このアプリのチャートでも確認できます。'}
+    ]},
+    {id:'fundamental',label:'ファンダメンタルズ',items:[
+      {ic:'per',t:'【中級】PER（株価収益率）とは',b:'株価÷1株あたり純利益。<b style="color:#f59e0b">割安・割高</b>を判断する基本指標。<br><br>• 低PER → 割安の可能性<br>• 高PER → 成長期待が高い<br>• 一般的に<b style="color:#00e5ff">15〜20倍</b>が目安'},
+      {ic:'pbr',t:'【中級】PBR（株価純資産倍率）とは',b:'株価÷1株あたり純資産。<b style="color:#f59e0b">資産面の割安度</b>を示す指標。<br><br>• <b style="color:#00e5ff">1倍未満</b>：解散価値より安い（割安の目安）<br>• 1倍以上：将来の成長を市場が期待'},
+      {ic:'calendar',t:'【中級】権利確定日・権利落ち日とは',b:'<b style="color:#f59e0b">権利確定日</b>：配当金・株主優待の権利が確定する日。この日に保有している必要があります。<br><br><b style="color:#ff4d6d">権利落ち日</b>：確定日の翌営業日。この日以降に購入しても権利は得られません。'},
+      {ic:'roe',t:'【上級】ROE（自己資本利益率）とは',b:'純利益÷自己資本×100。<b style="color:#f59e0b">株主のお金をどれだけ効率よく使っているか</b>を示す指標。<br><br>• <b style="color:#00e5ff">10%以上</b>が優良企業の目安'},
+      {ic:'report',t:'【上級】決算の読み方',b:'企業が年4回発表する業績報告。<br><br>• <b style="color:#00e5ff">売上高</b>：本業の収入<br>• <b style="color:#00e5ff">営業利益</b>：本業の稼ぎ<br>• <b style="color:#f59e0b">上方修正</b>：予想↑ → 株価上昇要因<br>• <b style="color:#ff4d6d">下方修正</b>：予想↓ → 株価下落要因'},
+      {ic:'sector',t:'【上級】セクター（業種）別の特性',b:'<b style="color:#00e5ff">景気敏感株</b>：景気の影響を受けやすい（自動車・鉄鋼）<br><b style="color:#00ff9d">ディフェンシブ株</b>：景気に関係なく安定（食品・医薬品）<br><br>円安→輸出企業に有利 / 円高→輸入企業に有利'}
+    ]}
+  ];
+  var html='<div style="background:#1a1f2e;border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;">';
+  html+='<div style="padding:16px 20px 0;flex-shrink:0;">';
+  html+='<div style="font-size:15px;font-weight:700;color:#e2e8f0;text-align:center;margin-bottom:12px;">用語解説</div>';
+  html+='<div style="display:flex;gap:4px;border-bottom:1px solid rgba(255,255,255,.08);">';
+  CATS.forEach(function(cat,i){
+    var active=i===0;
+    html+='<button class="gl-tab-btn" data-tab="'+cat.id+'" onclick="glTab(\''+cat.id+'\')" style="flex:1;padding:8px 4px;font-size:11px;font-weight:600;border:none;cursor:pointer;border-radius:6px 6px 0 0;transition:all .2s;background:'+(active?'rgba(0,229,255,.1)':'rgba(255,255,255,.05)')+';color:'+(active?'#00e5ff':'#64748b')+';border-bottom:'+(active?'2px solid #00e5ff':'2px solid transparent')+';">'+cat.label+'</button>';
+  });
+  html+='</div></div>';
+  html+='<div style="overflow-y:auto;padding:12px 16px 16px;flex:1;">';
+  CATS.forEach(function(cat,i){
+    html+='<div class="gl-tab-pane" data-pane="'+cat.id+'" style="display:'+(i===0?'block':'none')+';">';
+    html+='<div style="display:flex;flex-direction:column;gap:6px;">';
+    cat.items.forEach(function(item){
+      html+='<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;">';
+      html+='<div class="gl-head" onclick="toggleGlossaryItem(this)" style="display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;background:rgba(255,255,255,.02);color:#00e5ff;">';
+      html+=IC[item.ic];
+      html+='<span style="font-size:13px;font-weight:600;color:#e2e8f0;flex:1;">'+item.t+'</span>';
+      html+='<span class="gl-arrow" style="color:rgba(255,255,255,.35);font-size:10px;flex-shrink:0;">▶</span>';
+      html+='</div>';
+      html+='<div class="gl-body" style="display:none;padding:12px 14px;font-size:12px;color:#94a3b8;line-height:1.8;border-top:1px solid rgba(255,255,255,.06);">'+item.b+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>';
+  html+='<div style="padding:12px 16px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.06);text-align:center;"><button onclick="document.getElementById(\'glossaryModal\').style.display=\'none\'" style="background:rgba(255,255,255,.08);border:none;color:#94a3b8;padding:10px 40px;border-radius:20px;font-size:13px;cursor:pointer;">閉じる</button></div>';
+  html+='</div>';
+  ov.innerHTML=html;
+  document.body.appendChild(ov);
+}
+function _oldOpenGlossary_disabled3(){
   var body=el.nextElementSibling;
   var isOpen=body.style.display==='block';
   var modal=el.closest('#glossaryModal');
