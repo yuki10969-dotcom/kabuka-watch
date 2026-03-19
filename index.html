@@ -1985,6 +1985,16 @@ function openGlossary(){
   </div>
   <button onclick="document.getElementById('glossaryModal').style.display='none'" style="width:100%;margin-top:16px;padding:13px;background:rgba(255,255,255,.08);border:none;border-radius:10px;color:#e2e8f0;font-size:13px;cursor:pointer;font-weight:600;">閉じる</button>
 </div>`;
+  var items=ov.querySelectorAll('.gl-item');
+  items.forEach(function(item){
+    var head=item.querySelector('.gl-head');
+    var body=item.querySelector('.gl-body');
+    if(head&&body){
+      body.style.display='none';
+      head.style.cursor='pointer';
+      head.addEventListener('click',function(){toggleGlossaryItem(head);});
+    }
+  });
   document.body.appendChild(ov);
 }
 </script>
