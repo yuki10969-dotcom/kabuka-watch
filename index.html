@@ -794,8 +794,9 @@ async function one(c){
     }
     for(const msg of msgs)await disc(msg);
     save();
-  }catch(e){s.upd='エラー: '+e.message;save();}
-  render();
+ }catch(e){s.upd='エラー: '+e.message;save();}
+  var g=document.getElementById('grid');
+  if(g)g.innerHTML=Object.keys(D.stocks).map((k,i)=>card(k,i)).join('');
 }
 
 async function all(){
