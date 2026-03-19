@@ -1,4 +1,4 @@
-const CACHE = 'kbk-v1';
+const CACHE = 'kbk-v3';
 const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', function(e) {
