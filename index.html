@@ -662,7 +662,6 @@ function confirmDel(c){
   ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
 }
 function delS(c){
-  if(!confirm('「'+D.stocks[c]?.name+'（'+c+'）」を削除しますか？'))return;
   delete D.stocks[c];save();render();closeChartPanel();toast('🗑️ 削除しました',0,'#ff4d6d');
 }
 
