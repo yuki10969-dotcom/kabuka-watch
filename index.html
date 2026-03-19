@@ -1909,6 +1909,151 @@ function toggleGlossaryItem(el){
   pane.querySelectorAll('.gl-arrow').forEach(function(a){a.textContent='▶';});
   if(!isOpen){body.style.display='block';el.querySelector('.gl-arrow').textContent='▼';}
 }
+function openHowTo(){
+  var old=document.getElementById('howToModal');
+  if(old){old.style.display='flex';return;}
+  var ov=document.createElement('div');
+  ov.id='howToModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:2000;display:flex;align-items:flex-end;justify-content:center;';
+  ov.onclick=function(e){if(e.target===ov)ov.style.display='none';};
+  var STEPS=[
+    {color:'#00e5ff',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',title:'マーケットタブ',desc:'登録した銘柄の株価をリアルタイムで監視する画面です。',points:['銘柄カードをタップするとチャートが開きます','🔄ボタンで個別に株価を更新できます','日経平均・TOPIX・ドル円が上部に表示されます'],screen:function(){
+      return '<div style="background:#060a12;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">'+
+        '<div style="background:#0d1422;padding:5px 8px;display:flex;gap:6px;">'+
+        '<div style="background:#111827;border-radius:4px;padding:3px 6px;flex:1;"><div style="font-size:8px;color:#64748b;">日経平均</div><div style="font-size:10px;color:#e2e8f0;font-weight:700;">53,373</div><div style="font-size:8px;color:#ff4d6d;">-0.83%</div></div>'+
+        '<div style="background:#111827;border-radius:4px;padding:3px 6px;flex:1;"><div style="font-size:8px;color:#64748b;">TOPIX</div><div style="font-size:10px;color:#e2e8f0;font-weight:700;">105</div><div style="font-size:8px;color:#00ff9d;">+0.00%</div></div>'+
+        '<div style="background:#111827;border-radius:4px;padding:3px 6px;flex:1;"><div style="font-size:8px;color:#64748b;">ドル円</div><div style="font-size:10px;color:#e2e8f0;font-weight:700;">159円</div><div style="font-size:8px;color:#00ff9d;">+0.10%</div></div>'+
+        '</div>'+
+        '<div style="padding:5px 6px;display:flex;flex-direction:column;gap:3px;">'+
+        '<div style="background:#111827;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;">'+
+        '<div><div style="font-size:9px;color:#00e5ff;font-weight:700;">2502</div><div style="font-size:7px;color:#64748b;">アサヒG</div></div>'+
+        '<div style="text-align:right;"><div style="font-size:11px;color:#e2e8f0;font-weight:700;">1,576円</div><div style="font-size:8px;color:#ff4d6d;">-1.4%</div></div>'+
+        '</div>'+
+        '<div style="background:#111827;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;">'+
+        '<div><div style="font-size:9px;color:#00e5ff;font-weight:700;">7203</div><div style="font-size:7px;color:#64748b;">トヨタ</div></div>'+
+        '<div style="text-align:right;"><div style="font-size:11px;color:#e2e8f0;font-weight:700;">3,325円</div><div style="font-size:8px;color:#ff4d6d;">-1.8%</div></div>'+
+        '</div>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-around;padding:4px 0;border-top:1px solid rgba(255,255,255,.08);">'+
+        '<div style="font-size:7px;color:#00e5ff;text-align:center;">マーケット</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">口座管理</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">銘柄検索</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">メニュー</div>'+
+        '</div></div>';
+    }},
+    {color:'#00ff9d',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff9d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',title:'銘柄検索タブ',desc:'証券コードまたは銘柄名で株を検索して登録する画面です。',points:['4桁の証券コード（例：7203）で検索できます','銘柄名（例：トヨタ）でも検索できます','「追加」をタップするとマーケットに登録されます'],screen:function(){
+      return '<div style="background:#060a12;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">'+
+        '<div style="padding:8px 10px;"><div style="font-size:10px;color:#00ff9d;font-weight:700;margin-bottom:6px;">銘柄検索・登録</div>'+
+        '<div style="background:#111827;border-radius:6px;padding:6px 10px;border:1px solid rgba(0,229,255,.3);font-size:9px;color:#475569;">例：7203 または トヨタ</div>'+
+        '<div style="margin-top:8px;background:#111827;border-radius:6px;padding:6px 10px;border:1px solid rgba(255,255,255,.08);">'+
+        '<div style="font-size:9px;color:#00e5ff;font-weight:700;">7203　トヨタ自動車</div>'+
+        '<div style="font-size:8px;color:#64748b;margin-top:2px;">現在値：3,325円　-1.77%</div>'+
+        '<div style="margin-top:5px;"><button style="background:rgba(0,229,255,.15);border:1px solid rgba(0,229,255,.4);border-radius:4px;color:#00e5ff;font-size:8px;padding:2px 10px;cursor:default;">追加</button></div>'+
+        '</div></div>'+
+        '<div style="display:flex;justify-content:space-around;padding:4px 0;border-top:1px solid rgba(255,255,255,.08);">'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">マーケット</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">口座管理</div>'+
+        '<div style="font-size:7px;color:#00ff9d;text-align:center;">銘柄検索</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">メニュー</div>'+
+        '</div></div>';
+    }},
+    {color:'#f59e0b',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>',title:'口座管理タブ',desc:'バーチャルトレードの売買記録と損益を管理する画面です。',points:['「買い」「売り」で仮想取引を記録できます','ポジション・取引履歴・資産推移の3タブで確認できます','仮想資金を使って投資の練習ができます'],screen:function(){
+      return '<div style="background:#060a12;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">'+
+        '<div style="padding:6px 8px;">'+
+        '<div style="font-size:10px;color:#e2e8f0;font-weight:700;margin-bottom:5px;">口座管理</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:5px;">'+
+        '<div style="background:#111827;border-radius:4px;padding:3px 5px;"><div style="font-size:7px;color:#64748b;">残り資金</div><div style="font-size:9px;color:#e2e8f0;font-weight:700;">661,900円</div></div>'+
+        '<div style="background:#111827;border-radius:4px;padding:3px 5px;"><div style="font-size:7px;color:#64748b;">含み損益</div><div style="font-size:9px;color:#ff4d6d;font-weight:700;">-6,000円</div></div>'+
+        '<div style="background:#111827;border-radius:4px;padding:3px 5px;"><div style="font-size:7px;color:#64748b;">確定損益</div><div style="font-size:9px;color:#00ff9d;font-weight:700;">+300円</div></div>'+
+        '</div>'+
+        '<div style="display:flex;gap:3px;margin-bottom:5px;">'+
+        '<div style="background:#00e5ff;border-radius:4px;padding:2px 6px;font-size:7px;color:#060a12;font-weight:700;">ポジション</div>'+
+        '<div style="background:#111827;border-radius:4px;padding:2px 6px;font-size:7px;color:#64748b;">取引履歴</div>'+
+        '<div style="background:#111827;border-radius:4px;padding:2px 6px;font-size:7px;color:#64748b;">資産推移</div>'+
+        '</div>'+
+        '<div style="background:#111827;border-radius:5px;padding:5px 8px;display:flex;justify-content:space-between;align-items:center;">'+
+        '<div><div style="font-size:9px;color:#00e5ff;font-weight:700;">7203</div><div style="font-size:7px;color:#64748b;">100株</div></div>'+
+        '<div style="text-align:right;"><div style="font-size:9px;color:#e2e8f0;">3,325円</div><div style="font-size:8px;color:#ff4d6d;">-6,000円</div></div>'+
+        '</div>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-around;padding:4px 0;border-top:1px solid rgba(255,255,255,.08);">'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">マーケット</div>'+
+        '<div style="font-size:7px;color:#f59e0b;text-align:center;">口座管理</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">銘柄検索</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">メニュー</div>'+
+        '</div></div>';
+    }},
+    {color:'#a855f7',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>',title:'メニュータブ',desc:'各種機能や解説にアクセスする画面です。',points:['「用語解説」で投資用語を確認できます','「使い方ガイド」でこの説明を再表示できます','「銘柄を追加する」で銘柄登録モーダルを開けます'],screen:function(){
+      return '<div style="background:#060a12;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">'+
+        '<div style="padding:8px 10px;display:flex;flex-direction:column;gap:4px;">'+
+        '<div style="font-size:10px;color:#e2e8f0;font-weight:700;margin-bottom:2px;">メニュー</div>'+
+        '<div style="background:#111827;border-radius:6px;padding:6px 10px;border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg><span style="font-size:9px;color:#e2e8f0;">用語解説</span></div>'+
+        '<div style="background:rgba(0,229,255,.08);border-radius:6px;padding:6px 10px;border:1px solid rgba(0,229,255,.2);display:flex;align-items:center;gap:6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span style="font-size:9px;color:#00e5ff;font-weight:700;">使い方ガイド</span></div>'+
+        '<div style="background:#111827;border-radius:6px;padding:6px 10px;border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:6px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span style="font-size:9px;color:#e2e8f0;">銘柄を追加する</span></div>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-around;padding:4px 0;border-top:1px solid rgba(255,255,255,.08);">'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">マーケット</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">口座管理</div>'+
+        '<div style="font-size:7px;color:#475569;text-align:center;">銘柄検索</div>'+
+        '<div style="font-size:7px;color:#a855f7;text-align:center;">メニュー</div>'+
+        '</div></div>';
+    }},
+    {color:'#00e5ff',icon:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/><rect x="4" y="18" width="3" height="4" rx="1"/><rect x="10.5" y="14" width="3" height="8" rx="1"/><rect x="17" y="16" width="3" height="6" rx="1"/></svg>',title:'チャートの使い方',desc:'銘柄カードをタップすると表示されるチャート画面です。',points:['上部のボタンでローソク足・折れ線を切り替えられます','RSI・MACD・ボリンジャーバンドを表示できます','2本指でピンチイン・アウトして拡大縮小できます'],screen:function(){
+      return '<div style="background:#060a12;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1);">'+
+        '<div style="background:#0d1422;padding:5px 8px;display:flex;align-items:center;justify-content:space-between;">'+
+        '<div style="font-size:9px;color:#e2e8f0;font-weight:700;">アサヒG (2502)</div>'+
+        '<div style="display:flex;gap:4px;">'+
+        '<div style="background:#111827;border-radius:4px;padding:2px 5px;font-size:7px;color:#64748b;">取引</div>'+
+        '<div style="background:#111827;border-radius:4px;padding:2px 5px;font-size:7px;color:#64748b;">日足</div>'+
+        '</div></div>'+
+        '<div style="padding:4px 6px;display:flex;gap:3px;border-bottom:1px solid rgba(255,255,255,.06);">'+
+        '<div style="background:#1a1f2e;border-radius:4px;padding:2px 6px;font-size:7px;color:#00e5ff;border:1px solid rgba(0,229,255,.3);">ローソク足</div>'+
+        '<div style="background:transparent;border-radius:4px;padding:2px 6px;font-size:7px;color:#475569;">折れ線</div>'+
+        '<div style="background:transparent;border-radius:4px;padding:2px 6px;font-size:7px;color:#475569;">RSI</div>'+
+        '<div style="background:transparent;border-radius:4px;padding:2px 6px;font-size:7px;color:#475569;">BB</div>'+
+        '<div style="background:transparent;border-radius:4px;padding:2px 6px;font-size:7px;color:#475569;">MACD</div>'+
+        '</div>'+
+        '<div style="height:55px;padding:4px 6px;position:relative;background:#060a12;">'+
+        '<svg width="100%" height="50" viewBox="0 0 260 50">'+
+        '<polyline points="0,40 20,35 40,38 60,20 80,25 100,30 120,15 140,22 160,28 180,20 200,25 220,18 240,22 260,15" fill="none" stroke="#00e5ff" stroke-width="1"/>'+
+        '<line x1="0" y1="25" x2="260" y2="20" stroke="#00ff9d" stroke-width="0.5" stroke-dasharray="3"/>'+
+        '<line x1="0" y1="35" x2="260" y2="32" stroke="#a855f7" stroke-width="0.5" stroke-dasharray="3"/>'+
+        '<rect x="30" y="20" width="4" height="12" fill="#00ff9d" rx="0.5"/>'+
+        '<rect x="50" y="28" width="4" height="10" fill="#ff4d6d" rx="0.5"/>'+
+        '<rect x="70" y="18" width="4" height="14" fill="#00ff9d" rx="0.5"/>'+
+        '<rect x="90" y="22" width="4" height="8" fill="#ff4d6d" rx="0.5"/>'+
+        '<text x="220" y="14" fill="#e2e8f0" font-size="7" font-weight="700">1,576円</text>'+
+        '</svg>'+
+        '</div>'+
+        '</div>';
+    }}
+  ];
+  var html='<div style="background:#1a1f2e;border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:88vh;display:flex;flex-direction:column;">';
+  html+='<div style="padding:16px 20px 12px;flex-shrink:0;">';
+  html+='<div style="font-size:15px;font-weight:700;color:#e2e8f0;text-align:center;">使い方ガイド</div>';
+  html+='<div style="font-size:11px;color:#64748b;text-align:center;margin-top:2px;">各タブの機能を確認できます</div>';
+  html+='</div>';
+  html+='<div style="overflow-y:auto;padding:0 14px 14px;flex:1;display:flex;flex-direction:column;gap:6px;" id="howToList">';
+  STEPS.forEach(function(step,i){
+    var sid='howto-body-'+i;
+    html+='<div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;">';
+    html+='<div onclick="(function(el){var b=document.getElementById(\''+sid+'\');var arr=el.querySelector(\'.ht-arr\');var isOpen=b.style.display===\'block\';document.querySelectorAll(\'[id^=howto-body-]\').forEach(function(x){x.style.display=\'none\';});document.querySelectorAll(\'.ht-arr\').forEach(function(a){a.textContent=\'▶\';});if(!isOpen){b.style.display=\'block\';arr.textContent=\'▼\';};})(this)" style="display:flex;align-items:center;gap:10px;padding:12px;cursor:pointer;background:rgba(255,255,255,.02);">';
+    html+=step.icon;
+    html+='<span style="font-size:13px;font-weight:600;color:#e2e8f0;flex:1;">'+step.title+'</span>';
+    html+='<span class="ht-arr" style="color:rgba(255,255,255,.3);font-size:10px;">▶</span>';
+    html+='</div>';
+    html+='<div id="'+sid+'" style="display:none;border-top:1px solid rgba(255,255,255,.06);">';
+    html+='<div style="padding:10px 12px;">'+step.screen()+'</div>';
+    html+='<div style="padding:0 12px 10px;font-size:11px;color:#94a3b8;line-height:1.7;">'+step.desc+'<br>';
+    step.points.forEach(function(p){html+='• '+p+'<br>';});
+    html+='</div></div></div>';
+  });
+  html+='</div>';
+  html+='<div style="padding:12px 16px;flex-shrink:0;border-top:1px solid rgba(255,255,255,.06);text-align:center;"><button onclick="document.getElementById(\'howToModal\').style.display=\'none\'" style="background:rgba(255,255,255,.08);border:none;color:#94a3b8;padding:10px 40px;border-radius:20px;font-size:13px;cursor:pointer;">閉じる</button></div>';
+  html+='</div>';
+  ov.innerHTML=html;
+  document.body.appendChild(ov);
+}
 function openGlossary(){
   var old=document.getElementById('glossaryModal');
   if(old){old.style.display='flex';return;}
