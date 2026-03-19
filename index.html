@@ -796,8 +796,11 @@ async function one(c){
     for(const msg of msgs)await disc(msg);
     save();
  }catch(e){s.upd='エラー: '+e.message;save();}
- var g=document.getElementById('grid');
-  if(g)requestAnimationFrame(function(){g.innerHTML=Object.keys(D.stocks).map((k,i)=>card(k,i)).join('');});
+ clearTimeout(window._gridRafTimer);
+  window._gridRafTimer=setTimeout(function(){
+    var g=document.getElementById('grid');
+    if(g)requestAnimationFrame(function(){g.innerHTML=Object.keys(D.stocks).map((k,i)=>card(k,i)).join('');});
+  },50);
 }
 
 async function all(){
