@@ -1777,6 +1777,7 @@ if('serviceWorker' in navigator){
 <script>
 var _bnLastTab=null,_bnLastTime=0;
 function bnGo(tab){
+  try{localStorage.setItem('_lastTab',tab);}catch(e){}
   var now=Date.now();if(tab===_bnLastTab&&now-_bnLastTime<400)return;
   _bnLastTab=tab;_bnLastTime=now;
   ['market','account','search','menu'].forEach(function(t){
