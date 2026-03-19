@@ -1995,6 +1995,31 @@ function openGlossary(){
       head.addEventListener('click',function(){toggleGlossaryItem(head);});
     }
   });
+ // アコーディオン適用
+  var sections=ov.querySelectorAll('#glossaryModal > div > div > div');
+  sections.forEach(function(sec){
+    var children=Array.from(sec.children);
+    if(children.length<2)return;
+    var head=children[0];
+    var wrap=document.createElement('div');
+    wrap.style.cssText='display:none;padding:8px 0 4px;';
+    children.slice(1).forEach(function(c){wrap.appendChild(c.cloneNode(true));});
+    children.slice(1).forEach(function(c){c.remove();});
+    var arrow=document.createElement('span');
+    arrow.className='gl-arrow';
+    arrow.textContent=' ▶';
+    arrow.style.cssText='float:right;transition:transform .2s;color:var(--cyan);';
+    head.appendChild(arrow);
+    head.style.cursor='pointer';
+    head.addEventListener('click',function(){
+      var open=wrap.style.display==='block';
+      ov.querySelectorAll('[data-glbody]').forEach(function(b){b.style.display='none';});
+      ov.querySelectorAll('.gl-arrow').forEach(function(a){a.textContent=' ▶';});
+      if(!open){wrap.style.display='block';arrow.textContent=' ▼';}
+    });
+    wrap.setAttribute('data-glbody','1');
+    sec.appendChild(wrap);
+  });
   document.body.appendChild(ov);
 }
 </script>
