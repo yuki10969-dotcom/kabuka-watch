@@ -1796,10 +1796,10 @@ if(tab==='search'){
   setTimeout(function(){document.getElementById('sp-input').focus();},100);
   return;
 }
-  if(tab==='account'){
+ if(tab==='account'){
     accountPage.style.display='block';
-    renderT();
     window.scrollTo({top:0,behavior:'instant'});
+    setTimeout(function(){renderT();},0);
     return;
   }
   window.scrollTo({top:0,behavior:'instant'});
