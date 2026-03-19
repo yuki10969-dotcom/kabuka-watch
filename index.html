@@ -630,7 +630,7 @@ function addS(){
   if(!c||!n){toast('⚠️ 証券コードと銘柄名は必須です',1);return}
   if(D.stocks[c]){toast('⚠️ すでに登録済みです',1);return}
   D.stocks[c]={name:n,tp:p?parseInt(p):null,ri:r?parseInt(r):null,uma:ma,upb:pb,price:null,chg:null,rd:null,rw:null,m5:null,m25:null,pc:null,pa:null,upd:null,alts:[]};
-save();closeM();render();toast('✅ '+n+'（'+c+'）を追加しました');one(c);
+save();closeM();render();toast('✅ '+n+'（'+c+'）を追加しました');clearInterval(tmr);one(c);tmr=setInterval(all,(D.iv||5)*60000);
 var sp=document.getElementById('bp-search');
 if(sp&&sp.style.display!=='none'){
   document.getElementById('sp-input').value='';
