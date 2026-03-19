@@ -1684,9 +1684,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
 window.addEventListener('pagehide',function(){var active=['market','account','search','menu'].find(function(t){var el=document.getElementById('bn-'+t);return el&&el.classList.contains('active');});if(active)sessionStorage.setItem('_lastTab',active);});
 document.addEventListener('DOMContentLoaded', function(){
+  D=load();
+  var lastTab=sessionStorage.getItem('_lastTab')||'market';
   render();
-  var lastTab=sessionStorage.getItem('_lastTab');
-  if(lastTab&&lastTab!=='market')bnGo(lastTab);
+  if(lastTab!=='market')bnGo(lastTab);
   fetchIndices();
   setInterval(fetchIndices, 5*60*1000);
   if(Object.keys(D.stocks||{}).length){
