@@ -2297,6 +2297,9 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
   document.addEventListener('touchend',function(e){
     var cp=document.getElementById('chartPanel');
     if(!cp||cp.style.display==='none'){
+      var t=e.target;
+      var isBtn=t.closest&&(t.closest('.bnav-item')||t.closest('button')||t.closest('a'));
+      if(isBtn)return;
       var now=Date.now();
       if(now-_lastTapTime<300){e.preventDefault();}
       _lastTapTime=now;
