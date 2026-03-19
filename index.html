@@ -642,7 +642,7 @@ if(sp&&sp.style.display!=='none'){
 
 function delS(c){
   if(!confirm('「'+D.stocks[c]?.name+'（'+c+'）」を削除しますか？'))return;
-  delete D.stocks[c];save();render();toast('🗑️ 削除しました',0,'#ff4d6d');
+  delete D.stocks[c];save();render();closeChartPanel();toast('🗑️ 削除しました',0,'#ff4d6d');
 }
 
 function fetchIndices(){
