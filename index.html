@@ -802,7 +802,7 @@ async function one(c){
 async function all(){
   const cs=Object.keys(D.stocks);if(!cs.length)return;
   setSt('on','チェック中...');
-  for(let i=0;i<cs.length;i++){await one(cs[i]);if(i<cs.length-1)await new Promise(r=>setTimeout(r,1500));}
+  await Promise.all(cs.map(c=>one(c)));
   setSt('on','監視中 — 次回: '+D.iv+'分後');
   startCd();
 }
