@@ -696,7 +696,7 @@ function clickIndex(code,name){
   document.body.style.overflow='hidden';
   document.getElementById('ctitle').textContent=name+' ('+code+')';
   var vp=document.getElementById('vp');
-  if(vp)vp.content='width=device-width, initial-scale=1.0, user-scalable=yes';
+ if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
   curCT='candle';curRng='daily';
   ['5m','15m','1h','daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x==='daily');});
   document.getElementById('ct-candle').className='ctab yact';
@@ -884,7 +884,7 @@ function closeChartPanel(){
 function clickCard(c){
   selCode=c;render();
   var vp=document.getElementById('vp');
-  if(vp)vp.content='width=device-width, initial-scale=1.0, user-scalable=yes';
+  if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
   var panel=document.getElementById('chartPanel');panel.style.display='';
   document.getElementById('bnav').style.display='none';
   document.body.style.overflow='hidden';
