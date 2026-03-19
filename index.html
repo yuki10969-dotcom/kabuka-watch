@@ -1714,8 +1714,8 @@ document.addEventListener('DOMContentLoaded', function(){
   if(lastTab!=='market')setTimeout(function(){bnGo(lastTab);},50);
   fetchIndices();
   setInterval(fetchIndices, 5*60*1000);
-  if(Object.keys(D.stocks||{}).length){
-    all();
+ if(Object.keys(D.stocks||{}).length){
+    setTimeout(function(){all();},300);
     tmr=setInterval(all,(D.iv||5)*60000);
     setSt('on','監視中');
   }
