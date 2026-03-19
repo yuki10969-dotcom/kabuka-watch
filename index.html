@@ -1891,6 +1891,15 @@ function renderT(){
   var hb2=document.getElementById('tHistBody2');if(hb2)hb2.innerHTML=histHTML;
   var hb1=document.getElementById('tHistBody');if(hb1)hb1.innerHTML=histHTML;
 }
+function toggleGlossaryItem(el){
+  var body=el.nextElementSibling;
+  var arrow=el.querySelector('.gl-arrow');
+  var isOpen=body.style.display==='block';
+  var modal=el.closest('#glossaryModal');
+  modal.querySelectorAll('.gl-body').forEach(function(b){b.style.display='none';});
+  modal.querySelectorAll('.gl-arrow').forEach(function(a){a.textContent='▶';});
+  if(!isOpen){body.style.display='block';if(arrow)arrow.textContent='▼';}
+}
 function openGlossary(){
   var el=document.getElementById('glossaryModal');
   if(el){el.style.display='flex';return;}
