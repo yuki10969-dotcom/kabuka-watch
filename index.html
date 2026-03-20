@@ -46,7 +46,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .card:hover{border-color:rgba(0,229,255,.3);transform:translateY(-2px)}
 .card:hover::before{opacity:1}
 .card.fired{border-color:var(--yellow);box-shadow:0 0 20px rgba(255,224,102,.15)}
-@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes up{from{opacity:0}to{opacity:1}}
 .card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
 .code{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--cyan)}
 .cname{font-size:12px;color:var(--dim);margin-top:2px}
@@ -1713,7 +1713,7 @@ document.addEventListener('DOMContentLoaded', function(){
   render();
   if(lastTab!=='market')setTimeout(function(){bnGo(lastTab);},50);
   fetchIndices();
-  setInterval(fetchIndices, 5*60*1000);
+  if(!window._idxTmr)window._idxTmr=setInterval(fetchIndices, 5*60*1000);
  if(Object.keys(D.stocks||{}).length){
     setTimeout(function(){all();},300);
     tmr=setInterval(all,(D.iv||5)*60000);
@@ -1800,10 +1800,11 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-var _bnLastTab=null,_bnLastTime=0;
+var _bnLastTab=null,_bnLastTime=0,_bnAniTmr=null;
 function bnGo(tab){
   try{localStorage.setItem('_lastTab',tab);}catch(e){}
   _bnLastTab=tab;_bnLastTime=Date.now();
+  clearTimeout(_bnAniTmr);
   ['market','account','search','menu'].forEach(function(t){
     document.getElementById('bn-'+t).classList.toggle('active', t===tab);
   });
@@ -1815,13 +1816,13 @@ function bnGo(tab){
   if(tab==='menu'){ menuPage.style.display='block'; return; }
 if(tab==='search'){
   document.getElementById('bp-search').style.display='block';
-  setTimeout(function(){document.getElementById('sp-input').focus();},100);
+  _bnAniTmr=setTimeout(function(){document.getElementById('sp-input').focus();},100);
   return;
 }
  if(tab==='account'){
     accountPage.style.display='block';
     window.scrollTo({top:0,behavior:'instant'});
-    setTimeout(function(){renderT();},0);
+    _bnAniTmr=setTimeout(function(){renderT();},0);
     return;
   }
   window.scrollTo({top:0,behavior:'instant'});
