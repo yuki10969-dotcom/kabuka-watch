@@ -711,14 +711,27 @@ function fetchIndices(){
       cEl.className='idx-chg '+(diff>=0?'up':'dn');
     }
   }).catch(function(){});
-  // TOPIX：^TOPXから現在値のみ取得（日足データなし・前日比は---）
-  fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
+  // TOPIX：998405.Tで取得（api/stock.jsがYahoo JP優先→1306.Tフォールバック）
+  fetch('/api/stock?code=998405.T&interval=1d&range=5d')
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
   .then(function(d){
     var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
-    var price=ch.meta&&ch.meta.regularMarketPrice;
+    var m=ch.meta;
+    var q=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0];
+    var pair=getLastTwoDistinctCloses(ch.timestamp,q&&q.close);
+    var price=m.regularMarketPrice;
+    if(!price||isNaN(price))return;
+    var prev=pair?pair[1].close:(m.chartPreviousClose||m.previousClose);
     var pEl=document.getElementById('idx-topix-price');
-    if(pEl&&price&&!isNaN(price))pEl.textContent=fmtIdxNum(price,2);
+    var cEl=document.getElementById('idx-topix-chg');
+    if(!pEl||!cEl)return;
+    pEl.textContent=fmtIdxNum(price,2);
+    if(prev&&!isNaN(prev)){
+      var diff=price-prev;var pct=diff/prev*100;
+      var sign=diff>=0?'+':'';
+      cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
+      cEl.className='idx-chg '+(diff>=0?'up':'dn');
+    }
   }).catch(function(){});
   // ドル円
   fetch('/api/stock?code=USDJPY%3DX&interval=1d&range=5d')
