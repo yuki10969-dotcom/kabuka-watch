@@ -41,7 +41,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .tab:hover:not(.active){color:var(--text);border-color:var(--border)}
 .ctrl{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px}
 .grid{display:grid;grid-template-columns:1fr;gap:10px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .3s;animation:up .4s ease both;position:relative;overflow:hidden}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;transition:all .3s;animation:up .4s ease backwards;position:relative;overflow:hidden}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--green));opacity:0;transition:opacity .3s}
 .card:hover{border-color:rgba(0,229,255,.3);transform:translateY(-2px)}
 .card:hover::before{opacity:1}
@@ -252,7 +252,7 @@ hr{border:none;border-top:1px solid var(--border);margin:16px 0}
 .pm-btn.del{background:rgba(255,77,109,.1);color:#ff4d6d;border:1px solid rgba(255,77,109,.3);grid-column:span 2}
 .pm-close{width:100%;padding:12px;background:rgba(255,255,255,.08);border:none;border-radius:10px;color:var(--text);font-size:13px;cursor:pointer;font-weight:600;margin-top:4px}
 /* ボトムナビゲーション */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:500;background:#0d1117;border-top:1px solid var(--border);display:flex;height:60px;padding-bottom:env(safe-area-inset-bottom)}
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:500;background:#0d1117;border-top:1px solid var(--border);display:flex;height:60px;padding-bottom:env(safe-area-inset-bottom);-webkit-transform:translateZ(0);transform:translateZ(0)}
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--muted);transition:color .15s;-webkit-tap-highlight-color:transparent;border:none;background:transparent;padding:0;touch-action:manipulation}.bnav-item *{touch-action:manipulation}
 .bnav-item.active{color:var(--cyan)}
 .bnav-item svg{width:22px;height:22px;touch-action:manipulation}
@@ -2322,6 +2322,10 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
       var t=e.target;
       var isBtn=t.closest&&(t.closest('.bnav-item')||t.closest('button')||t.closest('a'));
       if(isBtn)return;
+      // Safari iOS bug: fixed要素の裏にあるカードがe.targetになる場合、
+      // タッチ終端座標がbnav領域内なら干渉しない
+      var touch=e.changedTouches&&e.changedTouches[0];
+      if(touch){var bnav=document.getElementById('bnav');if(bnav&&touch.clientY>=bnav.getBoundingClientRect().top)return;}
       var now=Date.now();
       if(now-_lastTapTime<300){e.preventDefault();}
       _lastTapTime=now;
