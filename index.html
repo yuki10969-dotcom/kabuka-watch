@@ -307,7 +307,7 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <div class="idx-price" id="idx-n225-price">--</div>
         <div class="idx-chg" id="idx-n225-chg">--</div>
       </div>
-      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TPX','TOPIX')">
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TOPX','TOPIX')">
         <div class="idx-name">TOPIX</div>
         <div class="idx-price" id="idx-topix-price">--</div>
         <div class="idx-chg" id="idx-topix-chg">--</div>
@@ -345,7 +345,7 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <div class="chart-name"><span></span></div>
       </div>
      <div id="maLegend" style="display:flex;flex-wrap:wrap;align-items:center;margin-bottom:10px;min-height:18px;"></div>
-      <div class="ct-row">
+      <div class="ct-row" id="ct-row">
         <div class="ctab yact" id="ct-candle" onclick="setCT('candle')">&#x1F4CA; &#x30ED;&#x30FC;&#x30BD;&#x30AF;&#x8DB3;</div>
         <div class="ctab" id="ct-price" onclick="setCT('price')">&#x6298;&#x308C;&#x7DDA;</div>
         <div class="ctab" id="ct-rsi" onclick="setCT('rsi')">RSI</div>
@@ -671,7 +671,7 @@ function delS(c){
 function fetchIndices(){
   var items=[
     {code:'^N225', encoded:'%5EN225', priceId:'idx-n225-price', chgId:'idx-n225-chg'},
-    {code:'^TPX',  encoded:'%5ETPX', priceId:'idx-topix-price', chgId:'idx-topix-chg'},
+    {code:'^TOPX', encoded:'%5ETOPX', priceId:'idx-topix-price', chgId:'idx-topix-chg'},
     {code:'USDJPY=X', encoded:'USDJPY%3DX', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
   ];
   items.forEach(function(item){
@@ -720,9 +720,11 @@ function clickIndex(code,name){
   document.getElementById('ctitle').textContent=name;
   var vp=document.getElementById('vp');
   if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
-  // 取引ボタンを非表示（指数には取引機能なし）
+  // 取引ボタン・インジケータータブを非表示（指数には取引機能なし）
   var tradeBtn=document.querySelector('#chartPanel button[onclick="openTradeSheet()"]');
   if(tradeBtn)tradeBtn.style.display='none';
+  var ctRow=document.getElementById('ct-row');
+  if(ctRow)ctRow.style.display='none';
   curCT='candle';curRng='daily';
   // 足種ドロップダウンのラベルをリセット
   var rngLabel=document.getElementById('rngLabel');
@@ -913,15 +915,22 @@ function closeChartPanel(){
   if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
   document.getElementById('bnav').style.display='flex';
   document.body.style.overflow='';
-  // 取引ボタンを再表示（clickIndexで非表示にした場合の復元）
+  // 取引ボタン・インジケータータブを再表示（clickIndexで非表示にした場合の復元）
   var tradeBtn=document.querySelector('#chartPanel button[onclick="openTradeSheet()"]');
   if(tradeBtn)tradeBtn.style.display='';
+  var ctRow=document.getElementById('ct-row');
+  if(ctRow)ctRow.style.display='';
   killCharts();
 }
 function clickCard(c){
   selCode=c;render();
   var vp=document.getElementById('vp');
   if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
+  // 取引ボタン・インジケータータブを表示（指数チャートから戻った場合の復元）
+  var tradeBtn=document.querySelector('#chartPanel button[onclick="openTradeSheet()"]');
+  if(tradeBtn)tradeBtn.style.display='';
+  var ctRow=document.getElementById('ct-row');
+  if(ctRow)ctRow.style.display='';
   var panel=document.getElementById('chartPanel');panel.style.display='';
   document.getElementById('bnav').style.display='none';
   document.body.style.overflow='hidden';
