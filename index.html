@@ -307,8 +307,8 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <div class="idx-price" id="idx-n225-price">--</div>
         <div class="idx-chg" id="idx-n225-chg">--</div>
       </div>
-      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TPX','TOPIX')">
-        <div class="idx-name">TOPIX</div>
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('1306.T','TOPIX ETF')">
+        <div class="idx-name">TOPIX ETF</div>
         <div class="idx-price" id="idx-topix-price">--</div>
         <div class="idx-chg" id="idx-topix-chg">--</div>
       </div>
@@ -671,7 +671,7 @@ function delS(c){
 function fetchIndices(){
   var items=[
     {code:'^N225', encoded:'%5EN225', priceId:'idx-n225-price', chgId:'idx-n225-chg'},
-    {code:'^TPX',  encoded:'%5ETPX',  priceId:'idx-topix-price', chgId:'idx-topix-chg'},
+    {code:'1306.T', encoded:'1306.T',  priceId:'idx-topix-price', chgId:'idx-topix-chg'},
     {code:'USDJPY=X', encoded:'USDJPY%3DX', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
   ];
   items.forEach(function(item){
