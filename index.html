@@ -285,7 +285,7 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <text x="16" y="12" fill="#ffe066" font-size="7" font-weight="bold" font-family="monospace">¥</text>
       </svg></div>
       <div>
-        <div class="logo-title">日本株<span>バーチャル</span>トレード</div>
+        <div class="logo-title">日本株<span>バーチャル</span><br>トレード</div>
         <div class="logo-sub">JAPAN STOCK VIRTUAL TRADE</div>
       </div>
     </div>
@@ -739,7 +739,7 @@ function clickIndex(code,name){
 function render(){
   const g=document.getElementById('grid');
   const cs=Object.keys(D.stocks);
-  if(!cs.length){g.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div>銘柄が登録されていません<br>「銘柄検索」から追加してください</div></div>';return;}
+  if(!cs.length){g.innerHTML='<div class="empty"><div class="empty-icon">🔍</div><div>銘柄が登録されていません</div><div>「銘柄検索」から追加してください</div></div>';return;}
   g.innerHTML=cs.map((c,i)=>card(c,i)).join('');
 }
 
