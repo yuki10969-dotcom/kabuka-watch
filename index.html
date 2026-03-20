@@ -739,7 +739,7 @@ function clickIndex(code,name){
 function render(){
   const g=document.getElementById('grid');
   const cs=Object.keys(D.stocks);
-  if(!cs.length){g.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div style="font-size:15px;font-weight:700;margin-bottom:6px;">銘柄が登録されていません</div><div style="font-size:13px;color:var(--muted);">「銘柄検索」から追加してください</div></div>';return;}
+  if(!cs.length){g.innerHTML='<div class="empty"><div style="font-size:15px;font-weight:700;margin-bottom:8px;">銘柄が登録されていません</div><div style="font-size:13px;color:var(--muted);">「銘柄検索」から追加してください</div></div>';return;}
   g.innerHTML=cs.map((c,i)=>card(c,i)).join('');
 }
 
