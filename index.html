@@ -740,33 +740,59 @@ var _renderedCodes=new Set();
 function render(){
   const g=document.getElementById('grid');
   const cs=Object.keys(D.stocks);
-  if(!cs.length){_renderedCodes.clear();g.innerHTML='<div class="empty"><div style="font-size:15px;font-weight:700;margin-bottom:8px;">銘柄が登録されていません</div><div style="font-size:13px;color:var(--muted);">「銘柄検索」から追加してください</div></div>';return;}
-  const newCodes=new Set(cs.filter(c=>!_renderedCodes.has(c)));
+  if(!cs.length){
+    _renderedCodes.clear();
+    g.innerHTML='<div class="empty"><div style="font-size:15px;font-weight:700;margin-bottom:8px;">銘柄が登録されていません</div><div style="font-size:13px;color:var(--muted);">「銘柄検索」から追加してください</div></div>';
+    return;
+  }
+  // 削除されたコードのカードをDOMから除去
+  _renderedCodes.forEach(function(c){
+    if(!D.stocks[c]){
+      var old=g.querySelector('[data-symbol="'+c+'"]');
+      if(old)old.remove();
+    }
+  });
   _renderedCodes=new Set(cs);
-  g.innerHTML=cs.map((c,i)=>card(c,i,newCodes.has(c))).join('');
+  cs.forEach(function(c,i){
+    var existing=g.querySelector('[data-symbol="'+c+'"]');
+    if(existing){
+      // 既存カードはアニメーションなしで内容だけ更新
+      existing.innerHTML=cardInner(c);
+      existing.className='card '+(D.stocks[c].alts&&D.stocks[c].alts.length?'fired':'');
+    } else {
+      // 新規カードはアニメーション付きで追加
+      var div=document.createElement('div');
+      div.setAttribute('data-symbol',c);
+      div.className='card '+(D.stocks[c].alts&&D.stocks[c].alts.length?'fired':'');
+      div.style.animationDelay=i*0.05+'s';
+      div.setAttribute('onclick','clickCard(\''+c+'\')');
+      div.innerHTML=cardInner(c);
+      g.appendChild(div);
+    }
+  });
+  // 順序を正しく保つ（追加された順にDOM並び替え）
+  cs.forEach(function(c,i){
+    var el=g.querySelector('[data-symbol="'+c+'"]');
+    if(el&&g.children[i]!==el)g.insertBefore(el,g.children[i]||null);
+  });
 }
 
-function card(c,i,animate){
+function cardInner(c){
   const s=D.stocks[c];
   const ps=s.price?Math.round(s.price).toLocaleString()+'円':'---';
   let ch='';
   if(s.chg!=null){const cl=s.chg>0?'up':'dn';const sg=s.chg>0?'+':'';ch='<span class="pchg '+cl+'">'+sg+s.chg.toFixed(1)+'%</span>';}
-  const rdc=s.rd!=null?(s.rd<=(s.ri||30)?'alert':s.rd<=40?'warn':''):'';
-  const rwc=s.rw!=null?(s.rw<=(s.ri||30)?'alert':s.rw<=40?'warn':''):'';
-  const pbc=s.pc!=null&&s.pa!=null?(s.pc<s.pa*.85?'good':s.pc>s.pa*1.15?'warn':''):'';
   const tags=[];
   if(s.tp)tags.push('<span class="tag t-price">目標 '+s.tp.toLocaleString()+'円</span>');
   if(s.ri)tags.push('<span class="tag t-rsi">RSI≤'+s.ri+'</span>');
   if(s.uma)tags.push('<span class="tag t-ma">MA5/25</span>');
   if(s.upb)tags.push('<span class="tag t-pbr">PBR比較</span>');
-  (s.alts||[]).forEach(a=>tags.push('<span class="tag t-fire">🔔 '+a+'</span>'));
-  const aniStyle=animate?'animation-delay:'+i*.05+'s':'animation:none';
-  return '<div class="card '+(s.alts?.length?'fired':'')+'" onclick="clickCard(\''+c+'\')" style="'+aniStyle+'">'+
-    '<div class="card-head"><div><div class="code">'+c+'</div><div class="cname">'+s.name+'</div></div>'+
+  (s.alts||[]).forEach(function(a){tags.push('<span class="tag t-fire">🔔 '+a+'</span>');});
+  return '<div class="card-head"><div><div class="code">'+c+'</div><div class="cname">'+s.name+'</div></div>'+
     '<div class="acts">'+
-   '<div class="ibtn del" onclick="event.stopPropagation();confirmDel(\''+c+'\')" title="削除">✕</div></div></div>'+
-  '<div class="prow"><div class="pmain">'+ps+'</div>'+ch+'</div>'+
-    '<div class="upd">'+(s.upd?'最終更新: '+s.upd:'未取得')+'<span class="click-hint">&#x25BC; チャート</span></div></div>';
+    '<div class="ibtn del" onclick="event.stopPropagation();confirmDel(\''+c+'\')" title="削除">✕</div></div></div>'+
+    '<div class="prow"><div class="pmain">'+ps+'</div>'+ch+'</div>'+
+    '<div class="upd">'+(s.upd?'最終更新: '+s.upd:'未取得')+'<span class="click-hint">&#x25BC; チャート</span></div>';
 }
 
 function rsi(cls,p=14){
@@ -1836,20 +1862,7 @@ if('serviceWorker' in navigator){
 
 <script>
 function reloadMarket(){
-  // 蓄積した描画キャッシュをリセット（全カードを新規扱いで再描画）
-  _renderedCodes.clear();
-  _rtHash=null;
-  // 保留中のアニメーションフレームをキャンセル
-  cancelAnimationFrame(window._gridRafTimer);
-  // インターバルを一旦クリアして重複起動を防止
-  clearInterval(window._idxTmr);
-  window._idxTmr=setInterval(fetchIndices,5*60*1000);
-  clearInterval(tmr);
-  if(Object.keys(D.stocks||{}).length){tmr=setInterval(all,(D.iv||5)*60000);}
-  // データ再取得
-  render();
-  fetchIndices();
-  if(typeof all==='function')all();
+  location.reload();
 }
 function reloadAccount(){if(typeof renderT==='function')renderT();}
 function reloadSearch(){document.getElementById('sp-input').value='';document.getElementById('sp-result').innerHTML='';}
@@ -2382,6 +2395,10 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
   },{passive:false});
   var _lastTapTime=0;
   document.addEventListener('touchend',function(e){
+    // プルリフレッシュ処理
+    if(pulling){pulling=false;refreshCurrentTab();}
+    sy=0;
+    // ダブルタップ防止（チャートパネル非表示時のみ）
     var cp=document.getElementById('chartPanel');
     if(!cp||cp.style.display==='none'){
       var t=e.target;
@@ -2396,10 +2413,6 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
       _lastTapTime=now;
     }
   },{passive:false});
-  document.addEventListener('touchend',function(){
-    if(pulling){pulling=false;refreshCurrentTab();}
-    sy=0;
-  },{passive:true});
 })();
 </script>
 </body>
