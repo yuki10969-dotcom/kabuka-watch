@@ -1741,6 +1741,16 @@ document.addEventListener('DOMContentLoaded', function(){
     tmr=setInterval(all,(D.iv||5)*60000);
     setSt('on','監視中');
   }
+  // bnavにtouchendリスナーを直接追加
+  // touchmoveでe.preventDefault()が呼ばれた後でもonclickに依存せず確実にbnGo()を呼ぶ
+  ['market','account','search','menu'].forEach(function(tab){
+    var el=document.getElementById('bn-'+tab);
+    if(el)el.addEventListener('touchend',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      bnGo(tab);
+    },{passive:false});
+  });
 });
 </script>
 
@@ -2337,6 +2347,9 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
    if(e.touches.length>1){var cp=document.getElementById('chartPanel');if(!cp||cp.style.display==='none'){e.preventDefault();}return;}
     var dy=e.touches[0].clientY-sy;
     if(window.scrollY===0&&dy>0){
+      // bnavエリアからのタッチは干渉しない（bnav onclickを潰さないため）
+      var bnav=document.getElementById('bnav');
+      if(bnav&&sy>=bnav.getBoundingClientRect().top)return;
       e.preventDefault();
       if(dy>60)pulling=true;
     }
