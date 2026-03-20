@@ -864,6 +864,7 @@ function start(){
   document.getElementById('sbtn').className='btn br';
   setSt('on','監視中');
   all();
+  clearInterval(tmr);
   tmr=setInterval(all,(D.iv||5)*60000);
 }
 
@@ -1834,7 +1835,22 @@ if('serviceWorker' in navigator){
 </div>
 
 <script>
-function reloadMarket(){fetchIndices();if(typeof all==='function')all();}
+function reloadMarket(){
+  // 蓄積した描画キャッシュをリセット（全カードを新規扱いで再描画）
+  _renderedCodes.clear();
+  _rtHash=null;
+  // 保留中のアニメーションフレームをキャンセル
+  cancelAnimationFrame(window._gridRafTimer);
+  // インターバルを一旦クリアして重複起動を防止
+  clearInterval(window._idxTmr);
+  window._idxTmr=setInterval(fetchIndices,5*60*1000);
+  clearInterval(tmr);
+  if(Object.keys(D.stocks||{}).length){tmr=setInterval(all,(D.iv||5)*60000);}
+  // データ再取得
+  render();
+  fetchIndices();
+  if(typeof all==='function')all();
+}
 function reloadAccount(){if(typeof renderT==='function')renderT();}
 function reloadSearch(){document.getElementById('sp-input').value='';document.getElementById('sp-result').innerHTML='';}
 var _bnLastTab=null,_bnLastTime=0,_bnAniTmr=null;
