@@ -710,32 +710,53 @@ function fetchIndices(){
       cEl.className='idx-chg '+(diff>=0?'up':'dn');
     }
   }).catch(function(){});
-  // TOPIX：^TOPXは日足timestampが返らないためmeta.regularMarketChange等を優先使用
-  fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
-  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-  .then(function(d){
-    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
+  // TOPIX：^TOPXを試し、価格データがなければ1608.T(先物)にフォールバック
+  function applyTopix(d){
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return false;
     var m=ch.meta;
     var price=m.regularMarketPrice;
+    if(!price||isNaN(price))return false;
     var pEl=document.getElementById('idx-topix-price');
     var cEl=document.getElementById('idx-topix-chg');
-    if(!pEl||!cEl)return;
+    if(!pEl||!cEl)return true;
     pEl.textContent=fmtIdxNum(price,2);
-    // regularMarketChange/Percentが使えればそれを優先、なければchartPreviousCloseから計算
     var diff,pct;
-    if(m.regularMarketChange!=null&&m.regularMarketChangePercent!=null){
+    if(m.regularMarketChange!=null&&!isNaN(m.regularMarketChange)&&m.regularMarketChangePercent!=null){
       diff=m.regularMarketChange;pct=m.regularMarketChangePercent;
     } else {
       var q=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0];
       var pair=getLastTwoDistinctCloses(ch.timestamp,q&&q.close);
       var prev=pair?pair[1].close:(m.chartPreviousClose||m.previousClose);
-      if(!prev)return;
-      diff=price-prev;pct=diff/prev*100;
+      if(prev&&!isNaN(prev)){diff=price-prev;pct=diff/prev*100;}
     }
-    var sign=diff>=0?'+':'';
-    cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
-    cEl.className='idx-chg '+(diff>=0?'up':'dn');
-  }).catch(function(){});
+    if(diff!=null&&!isNaN(diff)){
+      var sign=diff>=0?'+':'';
+      cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
+      cEl.className='idx-chg '+(diff>=0?'up':'dn');
+    } else {cEl.textContent='--';}
+    return true;
+  }
+  fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(d){
+    if(!applyTopix(d))throw new Error('no price');
+  }).catch(function(){
+    // フォールバック：1608.T（TOPIX先物）
+    fetch('/api/stock?code=1608.T&interval=1d&range=5d')
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      if(!applyTopix(d)){
+        // どちらも取得できない場合は '--' 表示
+        var pEl=document.getElementById('idx-topix-price');
+        var cEl=document.getElementById('idx-topix-chg');
+        if(pEl)pEl.textContent='--';if(cEl)cEl.textContent='--';
+      }
+    }).catch(function(){
+      var pEl=document.getElementById('idx-topix-price');
+      var cEl=document.getElementById('idx-topix-chg');
+      if(pEl)pEl.textContent='--';if(cEl)cEl.textContent='--';
+    });
+  });
   // ドル円
   fetch('/api/stock?code=USDJPY%3DX&interval=1d&range=5d')
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
