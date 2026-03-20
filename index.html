@@ -307,8 +307,8 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <div class="idx-price" id="idx-n225-price">--</div>
         <div class="idx-chg" id="idx-n225-chg">--</div>
       </div>
-      <div class="idx-card" id="idx-topix" onclick="clickIndex('1306.T','TOPIX ETF')">
-        <div class="idx-name">TOPIX ETF</div>
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TOPX','TOPIX')">
+        <div class="idx-name">TOPIX</div>
         <div class="idx-price" id="idx-topix-price">--</div>
         <div class="idx-chg" id="idx-topix-chg">--</div>
       </div>
@@ -669,48 +669,66 @@ function delS(c){
 }
 
 function fetchIndices(){
-  var items=[
-    {code:'^N225', encoded:'%5EN225', priceId:'idx-n225-price', chgId:'idx-n225-chg'},
-    {code:'1306.T', encoded:'1306.T',  priceId:'idx-topix-price', chgId:'idx-topix-chg'},
-    {code:'USDJPY=X', encoded:'USDJPY%3DX', priceId:'idx-usdjpy-price', chgId:'idx-usdjpy-chg'},
-  ];
-  items.forEach(function(item){
-    fetch('/api/stock?code='+item.encoded+'&interval=1d&range=5d')
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(d){
-      var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
-      if(!ch)return;
-      var m=ch.meta;
-      var price=m.regularMarketPrice;
-      var prev=m.previousClose||m.chartPreviousClose;
-      var chgPct=prev?(price-prev)/prev*100:null;
-      var pEl=document.getElementById(item.priceId);
-      var cEl=document.getElementById(item.chgId);
-      if(!pEl||!cEl)return;
-      var priceStr=item.code==='USDJPY=X'?price.toFixed(2)+'円':price>=100?Math.round(price).toLocaleString():price.toFixed(2);
-      pEl.textContent=priceStr;
-      if(chgPct!=null){var sign=chgPct>=0?'+':'';cEl.textContent=sign+chgPct.toFixed(2)+'%';cEl.className='idx-chg '+(chgPct>=0?'up':'dn');}
-   }).catch(function(){
-      setTimeout(function(){
-        fetch('/api/stock?code='+item.encoded+'&interval=1d&range=5d')
-        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-        .then(function(d){
-          var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];
-          if(!ch)return;
-          var m=ch.meta;
-          var price=m.regularMarketPrice;
-          var prev=m.previousClose||m.chartPreviousClose;
-          var chgPct=prev?(price-prev)/prev*100:null;
-          var pEl=document.getElementById(item.priceId);
-          var cEl=document.getElementById(item.chgId);
-          if(!pEl||!cEl)return;
-          var priceStr=item.code==='USDJPY=X'?price.toFixed(2)+'円':price>=100?Math.round(price).toLocaleString():price.toFixed(2);
-          pEl.textContent=priceStr;
-          if(chgPct!=null){var sign=chgPct>=0?'+':'';cEl.textContent=sign+chgPct.toFixed(2)+'%';cEl.className='idx-chg '+(chgPct>=0?'up':'down');}
-        }).catch(function(){});
-      }, 3000);
-    });
-  });
+  // 日経平均：日足closes[-2]を前日終値として前日比（円・%）を計算
+  fetch('/api/stock?code=%5EN225&interval=1d&range=5d')
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(d){
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
+    var m=ch.meta;
+    var closes=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0]&&ch.indicators.quote[0].close;
+    var price=m.regularMarketPrice;
+    // 日足closes[-2]が取れる場合はそれを前日終値、なければmeta値にフォールバック
+    var prev=(closes&&closes.length>=2)?closes[closes.length-2]:(m.chartPreviousClose||m.previousClose);
+    var pEl=document.getElementById('idx-n225-price');
+    var cEl=document.getElementById('idx-n225-chg');
+    if(!pEl||!cEl)return;
+    pEl.textContent=Math.round(price).toLocaleString();
+    if(prev){
+      var diff=price-prev;var pct=diff/prev*100;
+      var sign=diff>=0?'+':'';
+      cEl.textContent=sign+Math.round(diff).toLocaleString()+'（'+sign+pct.toFixed(2)+'%）';
+      cEl.className='idx-chg '+(diff>=0?'up':'dn');
+    }
+  }).catch(function(){});
+  // TOPIX：^TOPXはtimestampなしのためmeta.chartPreviousCloseで前日終値を取得
+  fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(d){
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
+    var m=ch.meta;
+    var price=m.regularMarketPrice;
+    var closes=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0]&&ch.indicators.quote[0].close;
+    var prev=(closes&&closes.length>=2)?closes[closes.length-2]:(m.chartPreviousClose||m.previousClose);
+    var pEl=document.getElementById('idx-topix-price');
+    var cEl=document.getElementById('idx-topix-chg');
+    if(!pEl||!cEl)return;
+    pEl.textContent=price>=100?Math.round(price).toLocaleString():price.toFixed(2);
+    if(prev){
+      var diff=price-prev;var pct=diff/prev*100;
+      var sign=diff>=0?'+':'';
+      cEl.textContent=sign+Math.round(diff).toLocaleString()+'（'+sign+pct.toFixed(2)+'%）';
+      cEl.className='idx-chg '+(diff>=0?'up':'dn');
+    }
+  }).catch(function(){});
+  // ドル円：前日比%のみ（円差は不要）
+  fetch('/api/stock?code=USDJPY%3DX&interval=1d&range=5d')
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(d){
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
+    var m=ch.meta;
+    var price=m.regularMarketPrice;
+    var prev=m.chartPreviousClose||m.previousClose;
+    var pEl=document.getElementById('idx-usdjpy-price');
+    var cEl=document.getElementById('idx-usdjpy-chg');
+    if(!pEl||!cEl)return;
+    pEl.textContent=price.toFixed(2)+'円';
+    if(prev){
+      var diff=price-prev;var pct=diff/prev*100;
+      var sign=diff>=0?'+':'';
+      cEl.textContent=sign+diff.toFixed(2)+'（'+sign+pct.toFixed(2)+'%）';
+      cEl.className='idx-chg '+(diff>=0?'up':'dn');
+    }
+  }).catch(function(){});
 }
 function clickIndex(code,name){
   selCode=code;
