@@ -1,5 +1,5 @@
-const CACHE = 'kbk-v3';
-const PRECACHE = ['/', '/index.html'];
+const CACHE = 'kbk-v4';
+const PRECACHE = ['/manifest.json'];
 
 self.addEventListener('install', function(e) {
   e.waitUntil(
@@ -17,10 +17,21 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
+  // APIリクエスト：常にネットワーク（キャッシュなし）
   if(e.request.url.includes('/api/')) {
     e.respondWith(fetch(e.request).catch(() => new Response('{}', {headers:{'Content-Type':'application/json'}})));
     return;
   }
+  // HTMLナビゲーション（/ や index.html）：常にネットワーク最新を取得
+  // キャッシュには保存せず、オフライン時のみキャッシュにフォールバック
+  if(e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+  // その他の静的アセット：ネットワーク優先、失敗時はキャッシュ
   e.respondWith(
     fetch(e.request)
       .then(res => {
