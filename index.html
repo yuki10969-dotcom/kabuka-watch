@@ -307,8 +307,8 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <div class="idx-price" id="idx-n225-price">--</div>
         <div class="idx-chg" id="idx-n225-chg">--</div>
       </div>
-      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TOPX','TOPIX')">
-        <div class="idx-name">TOPIX</div>
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('1306.T','TOPIX ETF')">
+        <div class="idx-name">TOPIX ETF</div>
         <div class="idx-price" id="idx-topix-price">--</div>
         <div class="idx-chg" id="idx-topix-chg">--</div>
       </div>
@@ -324,6 +324,7 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
       <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--panel);position:sticky;top:0;z-index:10;">
         <button onclick="closeChartPanel()" style="background:transparent;border:none;color:var(--cyan);cursor:pointer;display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;padding:4px 0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>戻る</button>
        <div style="font-size:15px;font-weight:900;color:var(--text);flex:1" id="ctitle">チャート</div>
+        <button onclick="reloadChart()" style="background:transparent;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;padding:6px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;" title="チャート再読込"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
         <button onclick="openTradeSheet()" style="background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3);color:var(--cyan);border-radius:8px;font-size:12px;font-weight:700;padding:6px 14px;cursor:pointer;margin-right:8px;display:flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>取引</button>
        <div class="rng-dropdown" id="rngDropdown">
           <button class="rng-sel" id="rngSelBtn" onclick="toggleRngMenu()">
@@ -710,53 +711,28 @@ function fetchIndices(){
       cEl.className='idx-chg '+(diff>=0?'up':'dn');
     }
   }).catch(function(){});
-  // TOPIX：^TOPXを試し、価格データがなければ1608.T(先物)にフォールバック
-  function applyTopix(d){
-    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return false;
+  // TOPIX ETF（1306.T）：日足closes[-2]を前日終値として前日比計算
+  fetch('/api/stock?code=1306.T&interval=1d&range=5d')
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(d){
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
     var m=ch.meta;
+    var q=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0];
+    var pair=getLastTwoDistinctCloses(ch.timestamp,q&&q.close);
     var price=m.regularMarketPrice;
-    if(!price||isNaN(price))return false;
+    if(!price||isNaN(price))return;
+    var prev=pair?pair[1].close:(m.chartPreviousClose||m.previousClose);
     var pEl=document.getElementById('idx-topix-price');
     var cEl=document.getElementById('idx-topix-chg');
-    if(!pEl||!cEl)return true;
+    if(!pEl||!cEl)return;
     pEl.textContent=fmtIdxNum(price,2);
-    var diff,pct;
-    if(m.regularMarketChange!=null&&!isNaN(m.regularMarketChange)&&m.regularMarketChangePercent!=null){
-      diff=m.regularMarketChange;pct=m.regularMarketChangePercent;
-    } else {
-      var q=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0];
-      var pair=getLastTwoDistinctCloses(ch.timestamp,q&&q.close);
-      var prev=pair?pair[1].close:(m.chartPreviousClose||m.previousClose);
-      if(prev&&!isNaN(prev)){diff=price-prev;pct=diff/prev*100;}
-    }
-    if(diff!=null&&!isNaN(diff)){
+    if(prev&&!isNaN(prev)){
+      var diff=price-prev;var pct=diff/prev*100;
       var sign=diff>=0?'+':'';
       cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
       cEl.className='idx-chg '+(diff>=0?'up':'dn');
-    } else {cEl.textContent='--';}
-    return true;
-  }
-  fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
-  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-  .then(function(d){
-    if(!applyTopix(d))throw new Error('no price');
-  }).catch(function(){
-    // フォールバック：1608.T（TOPIX先物）
-    fetch('/api/stock?code=1608.T&interval=1d&range=5d')
-    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-    .then(function(d){
-      if(!applyTopix(d)){
-        // どちらも取得できない場合は '--' 表示
-        var pEl=document.getElementById('idx-topix-price');
-        var cEl=document.getElementById('idx-topix-chg');
-        if(pEl)pEl.textContent='--';if(cEl)cEl.textContent='--';
-      }
-    }).catch(function(){
-      var pEl=document.getElementById('idx-topix-price');
-      var cEl=document.getElementById('idx-topix-chg');
-      if(pEl)pEl.textContent='--';if(cEl)cEl.textContent='--';
-    });
-  });
+    }
+  }).catch(function(){});
   // ドル円
   fetch('/api/stock?code=USDJPY%3DX&interval=1d&range=5d')
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
@@ -1062,6 +1038,7 @@ function setCT(t){
   document.getElementById('bb-opts').style.display=t==='bb'?'flex':'none';
   if(selCode&&CD[selCode])drawChart(selCode);
 }
+function reloadChart(){if(selCode){delete CD[selCode];loadChart(selCode,curRng);}}
 function mavg(a,n){return a.map(function(_,i){if(i<n-1)return null;var s=0;for(var j=i-n+1;j<=i;j++)s+=a[j];return s/n;});}
 async function loadChart(code,r){
   try{
