@@ -301,11 +301,16 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 
 
   <div id="dash">
- <div id="mkt-indices" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
+ <div id="mkt-indices" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
       <div class="idx-card" id="idx-n225" onclick="clickIndex('^N225','日経平均')">
         <div class="idx-name">日経平均</div>
         <div class="idx-price" id="idx-n225-price">--</div>
         <div class="idx-chg" id="idx-n225-chg">--</div>
+      </div>
+      <div class="idx-card" id="idx-topix" onclick="clickIndex('^TOPX','TOPIX')">
+        <div class="idx-name">TOPIX</div>
+        <div class="idx-price" id="idx-topix-price">--</div>
+        <div class="idx-chg" id="idx-topix-chg">---</div>
       </div>
       <div class="idx-card" id="idx-usdjpy" onclick="clickIndex('USDJPY=X','ドル円')">
         <div class="idx-name">ドル円</div>
@@ -705,6 +710,15 @@ function fetchIndices(){
       cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
       cEl.className='idx-chg '+(diff>=0?'up':'dn');
     }
+  }).catch(function(){});
+  // TOPIX：^TOPXから現在値のみ取得（日足データなし・前日比は---）
+  fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(d){
+    var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
+    var price=ch.meta&&ch.meta.regularMarketPrice;
+    var pEl=document.getElementById('idx-topix-price');
+    if(pEl&&price&&!isNaN(price))pEl.textContent=fmtIdxNum(price,2);
   }).catch(function(){});
   // ドル円
   fetch('/api/stock?code=USDJPY%3DX&interval=1d&range=5d')
