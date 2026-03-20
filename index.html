@@ -736,14 +736,17 @@ function clickIndex(code,name){
   loadChart(code,'daily');
   setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
+var _renderedCodes=new Set();
 function render(){
   const g=document.getElementById('grid');
   const cs=Object.keys(D.stocks);
-  if(!cs.length){g.innerHTML='<div class="empty"><div style="font-size:15px;font-weight:700;margin-bottom:8px;">銘柄が登録されていません</div><div style="font-size:13px;color:var(--muted);">「銘柄検索」から追加してください</div></div>';return;}
-  g.innerHTML=cs.map((c,i)=>card(c,i)).join('');
+  if(!cs.length){_renderedCodes.clear();g.innerHTML='<div class="empty"><div style="font-size:15px;font-weight:700;margin-bottom:8px;">銘柄が登録されていません</div><div style="font-size:13px;color:var(--muted);">「銘柄検索」から追加してください</div></div>';return;}
+  const newCodes=new Set(cs.filter(c=>!_renderedCodes.has(c)));
+  _renderedCodes=new Set(cs);
+  g.innerHTML=cs.map((c,i)=>card(c,i,newCodes.has(c))).join('');
 }
 
-function card(c,i){
+function card(c,i,animate){
   const s=D.stocks[c];
   const ps=s.price?Math.round(s.price).toLocaleString()+'円':'---';
   let ch='';
@@ -757,7 +760,8 @@ function card(c,i){
   if(s.uma)tags.push('<span class="tag t-ma">MA5/25</span>');
   if(s.upb)tags.push('<span class="tag t-pbr">PBR比較</span>');
   (s.alts||[]).forEach(a=>tags.push('<span class="tag t-fire">🔔 '+a+'</span>'));
-  return '<div class="card '+(s.alts?.length?'fired':'')+'" onclick="clickCard(\''+c+'\')" style="animation-delay:'+i*.05+'s">'+
+  const aniStyle=animate?'animation-delay:'+i*.05+'s':'animation:none';
+  return '<div class="card '+(s.alts?.length?'fired':'')+'" onclick="clickCard(\''+c+'\')" style="'+aniStyle+'">'+
     '<div class="card-head"><div><div class="code">'+c+'</div><div class="cname">'+s.name+'</div></div>'+
     '<div class="acts">'+
    '<div class="ibtn del" onclick="event.stopPropagation();confirmDel(\''+c+'\')" title="削除">✕</div></div></div>'+
@@ -1872,7 +1876,7 @@ function setAT(t){
     if(tb)tb.classList.toggle('active',x===t);
     if(tp)tp.style.display=x===t?'':'none';
   });
-  if(t==='perf')drawPerfChart();
+  if(t==='perf')setTimeout(drawPerfChart,50);
 }
 function drawPerfChart(){
   var trades=D.trades||[];
@@ -1926,9 +1930,14 @@ function drawPerfChart(){
   window._perfChartInst=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'資産残高',data:data,borderColor:pnlCol,backgroundColor:grad,borderWidth:2,pointRadius:4,pointBackgroundColor:pnlCol,fill:true,tension:.3}]},options:{responsive:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return Math.round(c.raw).toLocaleString()+'円';}}}},scales:{x:{ticks:{color:'#7a9ab8',font:{size:9},maxRotation:45},grid:{color:'rgba(28,46,72,.5)'}},y:{ticks:{color:'#7a9ab8',font:{size:10},callback:function(v){return (v/10000).toFixed(0)+'万';}},grid:{color:'rgba(28,46,72,.5)'},suggestedMin:Math.min.apply(null,data)*0.99,suggestedMax:Math.max.apply(null,data)*1.01}}}});
 }
 
+var _rtHash=null;
 function renderT(){
   var trades=D.trades||[];
   var stocks=D.stocks||{};
+  // データが変わっていなければ再描画をスキップ
+  var h=(trades.length)+'|'+Object.keys(stocks).map(function(k){return (stocks[k].price||0).toFixed(0);}).join(',');
+  if(h===_rtHash&&document.getElementById('tPosBody2')&&document.getElementById('tPosBody2').innerHTML)return;
+  _rtHash=h;
   var buys=trades.filter(function(t){return t.type==='buy'||t.type==='mbuy'||t.type==='short';});
   var tPnl=0,tCost=0;
   buys.forEach(function(t){var s=stocks[t.code];var cur=s&&s.price!=null?s.price:null;if(cur!=null){tPnl+=(cur-t.price)*t.qty;tCost+=t.price*t.qty;}});
