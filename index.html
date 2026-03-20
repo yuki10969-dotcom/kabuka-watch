@@ -717,11 +717,18 @@ function clickIndex(code,name){
   var panel=document.getElementById('chartPanel');panel.style.display='';
   document.getElementById('bnav').style.display='none';
   document.body.style.overflow='hidden';
-  document.getElementById('ctitle').textContent=name+' ('+code+')';
+  document.getElementById('ctitle').textContent=name;
   var vp=document.getElementById('vp');
- if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
+  if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes';
+  // 取引ボタンを非表示（指数には取引機能なし）
+  var tradeBtn=document.querySelector('#chartPanel button[onclick="openTradeSheet()"]');
+  if(tradeBtn)tradeBtn.style.display='none';
   curCT='candle';curRng='daily';
-  ['5m','15m','1h','daily','weekly','monthly'].forEach(function(x){document.getElementById('r'+x).classList.toggle('active',x==='daily');});
+  // 足種ドロップダウンのラベルをリセット
+  var rngLabel=document.getElementById('rngLabel');
+  if(rngLabel)rngLabel.textContent='日足';
+  var rngMenu=document.getElementById('rngMenu');
+  if(rngMenu){[].forEach.call(rngMenu.querySelectorAll('.rng-item'),function(el){el.classList.toggle('active',el.textContent==='日足');});}
   document.getElementById('ct-candle').className='ctab yact';
   ['price','rsi','bb','macd','sar'].forEach(function(x){var el=document.getElementById('ct-'+x);if(el)el.className='ctab';});
   loadChart(code,'daily');
@@ -750,7 +757,7 @@ function card(c,i){
   (s.alts||[]).forEach(a=>tags.push('<span class="tag t-fire">🔔 '+a+'</span>'));
   return '<div class="card '+(s.alts?.length?'fired':'')+'" onclick="clickCard(\''+c+'\')" style="animation-delay:'+i*.05+'s">'+
     '<div class="card-head"><div><div class="code">'+c+'</div><div class="cname">'+s.name+'</div></div>'+
-    '<div class="acts"><div class="ibtn" onclick="one(\''+c+'\')" title="更新"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div>'+
+    '<div class="acts">'+
    '<div class="ibtn del" onclick="event.stopPropagation();confirmDel(\''+c+'\')" title="削除">✕</div></div></div>'+
   '<div class="prow"><div class="pmain">'+ps+'</div>'+ch+'</div>'+
     '<div class="upd">'+(s.upd?'最終更新: '+s.upd:'未取得')+'<span class="click-hint">&#x25BC; チャート</span></div></div>';
@@ -906,6 +913,9 @@ function closeChartPanel(){
   if(vp)vp.content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
   document.getElementById('bnav').style.display='flex';
   document.body.style.overflow='';
+  // 取引ボタンを再表示（clickIndexで非表示にした場合の復元）
+  var tradeBtn=document.querySelector('#chartPanel button[onclick="openTradeSheet()"]');
+  if(tradeBtn)tradeBtn.style.display='';
   killCharts();
 }
 function clickCard(c){
