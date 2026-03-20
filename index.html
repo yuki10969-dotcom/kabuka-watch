@@ -668,49 +668,75 @@ function delS(c){
   delete D.stocks[c];save();render();closeChartPanel();toast('🗑️ 削除しました',0,'#ff4d6d');
 }
 
+// 数値を小数点以下decimals桁・カンマ付きでフォーマット
+function fmtIdxNum(n,decimals){
+  var abs=Math.abs(n).toFixed(decimals);
+  var parts=abs.split('.');
+  parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  return (n<0?'-':'')+parts.join('.');
+}
+// タイムスタンプ配列とclose配列から、日付が異なる最新2件のcloseを返す
+function getLastTwoDistinctCloses(timestamps,closes){
+  if(!timestamps||!closes)return null;
+  var seen=[];
+  for(var i=timestamps.length-1;i>=0&&seen.length<2;i--){
+    var dateStr=new Date(timestamps[i]*1000).toLocaleDateString('ja-JP',{timeZone:'Asia/Tokyo'});
+    var c=closes[i];
+    if(c==null)continue;
+    if(seen.length===0||seen[0].date!==dateStr){seen.push({date:dateStr,close:c});}
+  }
+  return seen.length===2?seen:null;
+}
 function fetchIndices(){
-  // 日経平均：日足closes[-2]を前日終値として前日比（円・%）を計算
+  // 日経平均：日足timestamps+closesから異なる日付の最新2件を取得して前日比計算
   fetch('/api/stock?code=%5EN225&interval=1d&range=5d')
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
   .then(function(d){
     var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
     var m=ch.meta;
-    var closes=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0]&&ch.indicators.quote[0].close;
+    var q=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0];
+    var pair=getLastTwoDistinctCloses(ch.timestamp,q&&q.close);
     var price=m.regularMarketPrice;
-    // 日足closes[-2]が取れる場合はそれを前日終値、なければmeta値にフォールバック
-    var prev=(closes&&closes.length>=2)?closes[closes.length-2]:(m.chartPreviousClose||m.previousClose);
+    // pair[0]=当日終値、pair[1]=前営業日終値
+    var prev=pair?pair[1].close:(m.chartPreviousClose||m.previousClose);
     var pEl=document.getElementById('idx-n225-price');
     var cEl=document.getElementById('idx-n225-chg');
     if(!pEl||!cEl)return;
-    pEl.textContent=Math.round(price).toLocaleString();
+    pEl.textContent=fmtIdxNum(price,2);
     if(prev){
       var diff=price-prev;var pct=diff/prev*100;
       var sign=diff>=0?'+':'';
-      cEl.textContent=sign+Math.round(diff).toLocaleString()+'（'+sign+pct.toFixed(2)+'%）';
+      cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
       cEl.className='idx-chg '+(diff>=0?'up':'dn');
     }
   }).catch(function(){});
-  // TOPIX：^TOPXはtimestampなしのためmeta.chartPreviousCloseで前日終値を取得
+  // TOPIX：^TOPXは日足timestampが返らないためmeta.regularMarketChange等を優先使用
   fetch('/api/stock?code=%5ETOPX&interval=1d&range=5d')
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
   .then(function(d){
     var ch=d&&d.chart&&d.chart.result&&d.chart.result[0];if(!ch)return;
     var m=ch.meta;
     var price=m.regularMarketPrice;
-    var closes=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0]&&ch.indicators.quote[0].close;
-    var prev=(closes&&closes.length>=2)?closes[closes.length-2]:(m.chartPreviousClose||m.previousClose);
     var pEl=document.getElementById('idx-topix-price');
     var cEl=document.getElementById('idx-topix-chg');
     if(!pEl||!cEl)return;
-    pEl.textContent=price>=100?Math.round(price).toLocaleString():price.toFixed(2);
-    if(prev){
-      var diff=price-prev;var pct=diff/prev*100;
-      var sign=diff>=0?'+':'';
-      cEl.textContent=sign+Math.round(diff).toLocaleString()+'（'+sign+pct.toFixed(2)+'%）';
-      cEl.className='idx-chg '+(diff>=0?'up':'dn');
+    pEl.textContent=fmtIdxNum(price,2);
+    // regularMarketChange/Percentが使えればそれを優先、なければchartPreviousCloseから計算
+    var diff,pct;
+    if(m.regularMarketChange!=null&&m.regularMarketChangePercent!=null){
+      diff=m.regularMarketChange;pct=m.regularMarketChangePercent;
+    } else {
+      var q=ch.indicators&&ch.indicators.quote&&ch.indicators.quote[0];
+      var pair=getLastTwoDistinctCloses(ch.timestamp,q&&q.close);
+      var prev=pair?pair[1].close:(m.chartPreviousClose||m.previousClose);
+      if(!prev)return;
+      diff=price-prev;pct=diff/prev*100;
     }
+    var sign=diff>=0?'+':'';
+    cEl.textContent=sign+fmtIdxNum(diff,2)+'（'+sign+pct.toFixed(2)+'%）';
+    cEl.className='idx-chg '+(diff>=0?'up':'dn');
   }).catch(function(){});
-  // ドル円：前日比%のみ（円差は不要）
+  // ドル円
   fetch('/api/stock?code=USDJPY%3DX&interval=1d&range=5d')
   .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
   .then(function(d){
