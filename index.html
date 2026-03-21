@@ -1911,7 +1911,25 @@ function reloadMarket(){_setReloading('btn-reload-market',true);location.reload(
 async function reloadAccount(){_setReloading('btn-reload-account',true);_rtHash=null;if(typeof renderT==='function')renderT();if(typeof all==='function'&&Object.keys((D&&D.stocks)||{}).length){try{await all();}catch(e){}}_rtHash=null;if(typeof renderT==='function')renderT();_setReloading('btn-reload-account',false);}
 function reloadSearch(){_setReloading('btn-reload-search',true);document.getElementById('sp-input').value='';document.getElementById('sp-result').innerHTML='';setTimeout(function(){_setReloading('btn-reload-search',false);},500);}
 function reloadMenu(){try{localStorage.setItem('_lastTab','menu');sessionStorage.setItem('_reloadTab','menu');}catch(e){}location.reload();}
-function resetAll(){if(!confirm('全データを削除します。よろしいですか？'))return;D.stocks={};D.trades=[];D.vtRemain=0;D.vtBudget=0;D.realizedPnl=0;D.cds={};save();render();if(typeof _rtHash!=='undefined')_rtHash=null;bnGo('market');toast('🗑️ リセットしました',0,'#ff4d6d');}
+function resetAll(){
+  var old=document.getElementById('resetModal');if(old)old.remove();
+  var ov=document.createElement('div');
+  ov.id='resetModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML='<div style="background:#1a1f2e;border-radius:16px;padding:24px 20px;width:100%;max-width:320px;border:1px solid rgba(255,77,109,.25);">'+
+    '<div style="width:44px;height:44px;border-radius:50%;background:rgba(255,77,109,.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">'+
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>'+
+    '</div>'+
+    '<div style="font-size:15px;font-weight:700;color:#e2e8f0;text-align:center;margin-bottom:6px;">データをリセット</div>'+
+    '<div style="font-size:13px;color:#64748b;text-align:center;margin-bottom:20px;line-height:1.6;">登録銘柄・取引履歴・ポジション・預かり資金を全て削除します。この操作は元に戻せません。</div>'+
+    '<div style="display:flex;gap:10px;">'+
+    '<button onclick="document.getElementById(\'resetModal\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;">キャンセル</button>'+
+    '<button onclick="document.getElementById(\'resetModal\').remove();_doReset()" style="flex:1;padding:12px;background:rgba(255,77,109,.15);border:1px solid rgba(255,77,109,.4);border-radius:10px;color:#ff4d6d;font-size:13px;font-weight:600;cursor:pointer;">リセットする</button>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+}
+function _doReset(){D.stocks={};D.trades=[];D.vtRemain=0;D.vtBudget=0;D.realizedPnl=0;D.cds={};save();render();if(typeof _rtHash!=='undefined')_rtHash=null;bnGo('market');toast('🗑️ リセットしました',0,'#ff4d6d');}
 var _bnLastTab=null,_bnLastTime=0,_bnAniTmr=null;
 function bnGo(tab){
   try{localStorage.setItem('_lastTab',tab);}catch(e){}
