@@ -2306,9 +2306,17 @@ function openGlossary(){
       <div></div>
       <button onclick="closeTradeSheet()" style="background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;">✕</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
       <button id="ts-buy-btn" onclick="selectTradeType('buy')" style="padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #00ff9d;background:rgba(0,255,157,.15);color:#00ff9d;cursor:pointer;">🟢 買う</button>
       <button id="ts-sell-btn" onclick="selectTradeType('sell')" style="padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">🔴 売る</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <button id="ts-market-btn" onclick="selectOrderType('market')" style="padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.15);color:var(--cyan);cursor:pointer;">成行</button>
+      <button id="ts-limit-btn" onclick="selectOrderType('limit')" style="padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">指値</button>
+    </div>
+    <div id="ts-limit-row" style="display:none;margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">指値価格（円）</label>
+      <input id="ts-limit-price" type="number" min="1" step="1" style="width:100%;box-sizing:border-box;text-align:right;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;" oninput="updateTotal()">
     </div>
     <div style="margin-bottom:12px;">
       <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">株数（100株単位）</label>
@@ -2327,6 +2335,7 @@ function openGlossary(){
 </div>
 <script>
 var _tsType='buy';
+var _tsOrderType='market';
 function openTradeSheet(){
   var code=selCode;if(!code)return;
   var s=D.stocks[code];
@@ -2353,7 +2362,10 @@ function openTradeSheet(){
     posDiv.style.display='block';
   }else{posDiv.style.display='none';}
   document.getElementById('ts-qty').value=100;
-  selectTradeType('buy');updateTotal();
+  selectTradeType('buy');
+  selectOrderType('market');
+  if(s&&s.price!=null)document.getElementById('ts-limit-price').value=Math.round(s.price);
+  updateTotal();
   document.getElementById('tradeSheet').style.display='flex';
 }
 function closeTradeSheet(){document.getElementById('tradeSheet').style.display='none';}
@@ -2372,16 +2384,43 @@ function selectTradeType(type){
   updateTotal();
 }
 function adjustQty(delta){var i=document.getElementById('ts-qty');var v=(parseInt(i.value)||0)+delta;if(v<100)v=100;i.value=v;updateTotal();}
+function selectOrderType(type){
+  _tsOrderType=type;
+  var mb=document.getElementById('ts-market-btn'),lb=document.getElementById('ts-limit-btn'),lr=document.getElementById('ts-limit-row');
+  if(type==='market'){
+    mb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.15);color:var(--cyan);cursor:pointer;';
+    lb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
+    lr.style.display='none';
+  }else{
+    lb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.15);color:var(--cyan);cursor:pointer;';
+    mb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
+    lr.style.display='block';
+  }
+  updateTotal();
+}
 function updateTotal(){
-  var s=D.stocks&&D.stocks[selCode];var p=s&&s.price!=null?s.price:null;
+  var s=D.stocks&&D.stocks[selCode];
+  var p;
+  if(_tsOrderType==='limit'){
+    p=parseFloat(document.getElementById('ts-limit-price').value)||null;
+  }else{
+    p=s&&s.price!=null?s.price:null;
+  }
   var q=parseInt(document.getElementById('ts-qty').value)||0;
   document.getElementById('ts-total').textContent=p&&q?Math.round(p*q).toLocaleString()+'円':'---';
 }
 function submitTradeSheet(){
   var code=selCode;if(!code){toast('銘柄が選択されていません',1);return;}
-  var s=D.stocks&&D.stocks[code];var price=s&&s.price!=null?s.price:null;
+  var s=D.stocks&&D.stocks[code];var marketPrice=s&&s.price!=null?s.price:null;
+  var price;
+  if(_tsOrderType==='limit'){
+    price=parseFloat(document.getElementById('ts-limit-price').value)||null;
+    if(!price||price<=0){toast('指値価格を入力してください',1);return;}
+  }else{
+    price=marketPrice;
+    if(!price){toast('株価データがありません',1);return;}
+  }
   var qty=parseInt(document.getElementById('ts-qty').value)||0;
-  if(!price){toast('株価データがありません',1);return;}
   if(qty<100){toast('株数は100株以上で入力してください',1);return;}
   var today=new Date();
   var dateStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
@@ -2397,9 +2436,10 @@ function submitTradeSheet(){
     var cost=price*qty;if((D.vtRemain||0)<cost){toast('残り資金が不足しています',1);return;}
     D.vtRemain=(D.vtRemain||0)-cost;
   }
-  D.trades.push({id:Date.now(),code:code,type:_tsType,date:dateStr,price:Math.round(price),qty:qty,memo:''});
+  D.trades.push({id:Date.now(),code:code,type:_tsType,date:dateStr,price:Math.round(price),qty:qty,memo:'',orderType:_tsOrderType});
   save();closeTradeSheet();
-  toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'注文を記録しました');
+  var orderLabel=_tsOrderType==='limit'?'指値':'成行';
+  toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'['+orderLabel+']注文を記録しました');
   renderT();
 }
 document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.target===this)closeTradeSheet();});
