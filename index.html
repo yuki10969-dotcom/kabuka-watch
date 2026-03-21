@@ -1803,7 +1803,8 @@ document.addEventListener('DOMContentLoaded', function(){
 window.addEventListener('pagehide',function(){var active=['market','account','search','menu'].find(function(t){var el=document.getElementById('bn-'+t);return el&&el.classList.contains('active');});if(active){try{localStorage.setItem('_lastTab',active);}catch(e){}}});
 document.addEventListener('DOMContentLoaded', function(){
   D=load();
-  var lastTab=localStorage.getItem('_lastTab')||'market';
+  var lastTab=sessionStorage.getItem('_reloadTab')||localStorage.getItem('_lastTab')||'market';
+  try{sessionStorage.removeItem('_reloadTab');}catch(e){}
   render();
   if(lastTab!=='market')setTimeout(function(){bnGo(lastTab);},50);
   fetchIndices();
@@ -1906,9 +1907,9 @@ if('serviceWorker' in navigator){
 <script>
 function _setReloading(id,on){var b=document.getElementById(id);if(b){if(on)b.classList.add('reloading');else b.classList.remove('reloading');}}
 function reloadMarket(){_setReloading('btn-reload-market',true);location.reload();}
-function reloadAccount(){_setReloading('btn-reload-account',true);if(typeof renderT==='function')renderT();setTimeout(function(){_setReloading('btn-reload-account',false);},500);}
+async function reloadAccount(){_setReloading('btn-reload-account',true);_rtHash=null;if(typeof renderT==='function')renderT();if(typeof all==='function'&&Object.keys((D&&D.stocks)||{}).length){await all();_rtHash=null;if(typeof renderT==='function')renderT();}_setReloading('btn-reload-account',false);}
 function reloadSearch(){_setReloading('btn-reload-search',true);document.getElementById('sp-input').value='';document.getElementById('sp-result').innerHTML='';setTimeout(function(){_setReloading('btn-reload-search',false);},500);}
-function reloadMenu(){try{localStorage.setItem('_lastTab','menu');}catch(e){}location.reload();}
+function reloadMenu(){try{localStorage.setItem('_lastTab','menu');sessionStorage.setItem('_reloadTab','menu');}catch(e){}location.reload();}
 var _bnLastTab=null,_bnLastTime=0,_bnAniTmr=null;
 function bnGo(tab){
   try{localStorage.setItem('_lastTab',tab);}catch(e){}
