@@ -373,6 +373,7 @@ body{padding-bottom:calc(60px + env(safe-area-inset-bottom))}
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="bb-3s" onchange="reDrawBB()" style="accent-color:var(--cyan)"> ±3σ</label>
       </div>
       <div class="chart-box" id="chartBox"></div>
+      <div id="chart-pending" style="margin-top:12px;"></div>
     </div>
   </div>
 
@@ -1009,34 +1010,72 @@ function checkLimitOrders(code,newPrice){
   if(!D.pendingOrders||!D.pendingOrders.length)return;
   var toFill=D.pendingOrders.filter(function(o){
     if(o.code!==code||o.status!=='pending')return false;
+    if(o.orderType==='market')return true;
     if(o.type==='buy'&&newPrice<=o.limitPrice)return true;
     if(o.type==='sell'&&newPrice>=o.limitPrice)return true;
     return false;
   });
   if(!toFill.length)return;
   var dateStr=new Date().toISOString().slice(0,10);
+  var anyFilled=false;
   toFill.forEach(function(o){
-    o.status='filled';
     var execPrice=newPrice;
     if(!D.trades)D.trades=[];
     if(o.type==='buy'){
-      // vtRemainはすでに仮押さえ済み
-      D.trades.push({id:Date.now(),code:o.code,type:'buy',date:dateStr,price:Math.round(execPrice),qty:o.qty,memo:'指値約定',orderType:'limit'});
+      if(o.orderType==='market'){
+        var cost=Math.round(execPrice)*o.qty;
+        if((D.vtRemain||0)<cost){o.status='cancelled';var sN=D.stocks&&D.stocks[o.code]?D.stocks[o.code].name:o.code;toast(sN+' 成行注文をキャンセル（資金不足）',1);return;}
+        D.vtRemain=(D.vtRemain||0)-cost;
+      }
+      o.status='filled';
+      D.trades.push({id:Date.now(),code:o.code,type:'buy',date:dateStr,price:Math.round(execPrice),qty:o.qty,memo:o.orderType==='market'?'成行約定':'指値約定',orderType:o.orderType});
     }else{
       var remains=o.qty,rPnl=0;
       var bList=(D.trades||[]).filter(function(t){return t.code===o.code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+      if(!bList.length){o.status='cancelled';toast(o.code+' 売り注文をキャンセル（買いポジションなし）',1);return;}
       for(var i=0;i<bList.length&&remains>0;i++){var b=bList[i];var use=Math.min(b.qty,remains);rPnl+=(execPrice-b.price)*use;b.qty-=use;remains-=use;}
       D.trades=(D.trades||[]).filter(function(t){return !(t.qty===0&&(t.type==='buy'||t.type==='mbuy'));});
       D.realizedPnl=(D.realizedPnl||0)+rPnl;
       D.vtRemain=(D.vtRemain||0)+Math.round(execPrice)*o.qty;
+      o.status='filled';
     }
     var sName=D.stocks&&D.stocks[o.code]?D.stocks[o.code].name:o.code;
-    toast(sName+' 指値注文が約定しました ('+(o.type==='buy'?'買い':'売り')+' '+Math.round(execPrice).toLocaleString()+'円×'+o.qty+'株)',0,'#ffe066');
+    var fillLabel=o.orderType==='market'?'成行注文':'指値注文';
+    toast(sName+' '+fillLabel+'が約定しました ('+(o.type==='buy'?'買い':'売り')+' '+Math.round(execPrice).toLocaleString()+'円×'+o.qty+'株)',0,'#ffe066');
+    anyFilled=true;
   });
   D.pendingOrders=D.pendingOrders.filter(function(o){return o.status==='pending';});
-  save();
-  _rtHash=null;
-  if(typeof renderT==='function')renderT();
+  if(anyFilled){
+    save();_rtHash=null;
+    if(typeof renderT==='function')renderT();
+    renderChartPendingOrders(code);
+  }
+}
+
+function renderChartPendingOrders(code){
+  var el=document.getElementById('chart-pending');if(!el)return;
+  var orders=(D.pendingOrders||[]).filter(function(o){return o.code===code&&o.status==='pending';});
+  if(!orders.length){el.innerHTML='';return;}
+  var rows=orders.map(function(o){
+    var typeLabel=o.orderType==='market'?'成行':'指値';
+    var buySell=o.type==='buy'?'買い':'売り';
+    var buySellColor=o.type==='buy'?'var(--green)':'var(--red)';
+    var priceStr=o.orderType==='market'?'—':o.limitPrice.toLocaleString()+'円';
+    var dt=o.datetime?new Date(o.datetime).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+    return '<div class="pend-row">'+
+      '<div class="pend-info">'+
+        '<div style="display:flex;align-items:center;gap:6px;">'+
+          '<span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;background:rgba(255,255,255,.08);color:var(--muted)">'+typeLabel+'</span>'+
+          '<span class="pend-type" style="color:'+buySellColor+'">'+buySell+'</span>'+
+          '<span class="pend-price">'+o.qty+'株</span>'+
+          (o.orderType==='limit'?'<span style="font-size:11px;color:var(--yellow);font-family:\'JetBrains Mono\',monospace;">'+priceStr+'</span>':'')+''+
+        '</div>'+
+        '<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+dt+'</div>'+
+      '</div>'+
+      '<button class="pend-cancel" onclick="cancelOrder('+o.id+')">キャンセル</button>'+
+    '</div>';
+  }).join('');
+  el.innerHTML='<div class="pend-section"><div class="pend-title">注文中 ('+orders.length+'件)</div>'+rows+'</div>';
 }
 
 var selCode=null,curRng='daily',curCT='candle',lwC=null,chartMC=null,CD={};
@@ -1068,6 +1107,7 @@ function clickCard(c){
   var s=D.stocks[c];
   document.getElementById('ctitle').textContent=(s?s.name:'')+' ('+c+')';
   loadChart(c,curRng);
+  renderChartPendingOrders(c);
   document.getElementById('tf-code').value=c;
   if(document.getElementById('tradePanel').style.display!=='none')renderT();
   setTimeout(function(){panel.scrollIntoView({behavior:'smooth',block:'start'});},150);
@@ -1364,9 +1404,11 @@ function cancelOrder(id){
   var orders=D.pendingOrders||[];
   var order=orders.find(function(o){return o.id===id;});
   if(!order)return;
-  if(order.type==='buy'){D.vtRemain=(D.vtRemain||0)+order.limitPrice*order.qty;}
+  // 指値買いのみ仮押さえ資金を返却
+  if(order.type==='buy'&&order.orderType==='limit'){D.vtRemain=(D.vtRemain||0)+order.limitPrice*order.qty;}
   D.pendingOrders=orders.filter(function(o){return o.id!==id;});
   save();_rtHash=null;renderT();
+  renderChartPendingOrders(order.code);
   toast('注文をキャンセルしました');
 }
 
@@ -2164,7 +2206,8 @@ function renderT(){
       var sName=stocks[o.code]?stocks[o.code].name:o.code;
       var typeColor=o.type==='buy'?'var(--green)':'var(--red)';
       var typeLabel=o.type==='buy'?'買い指値':'売り指値';
-      return '<div class="pend-row"><div class="pend-info"><span class="pend-code">'+o.code+'</span><span class="pend-name">'+sName+'</span><span class="pend-type" style="color:'+typeColor+'">'+typeLabel+'</span><span class="pend-price">'+o.limitPrice.toLocaleString()+'円 × '+o.qty+'株</span></div><button class="pend-cancel" onclick="cancelOrder('+o.id+')">キャンセル</button></div>';
+      var priceStr=o.orderType==='market'?'成行':o.limitPrice.toLocaleString()+'円';
+      return '<div class="pend-row"><div class="pend-info"><span class="pend-code">'+o.code+'</span><span class="pend-name">'+sName+'</span><span class="pend-type" style="color:'+typeColor+'">'+typeLabel+'</span><span class="pend-price">'+priceStr+' × '+o.qty+'株</span></div><button class="pend-cancel" onclick="cancelOrder('+o.id+')">キャンセル</button></div>';
     }).join('');
     pendHTML='<div class="pend-section"><div class="pend-title">注文中 ('+pendOrds.length+'件)</div>'+ordRows+'</div>';
   }
@@ -2550,38 +2593,43 @@ function updateTotal(){
 }
 function submitTradeSheet(){
   var code=selCode;if(!code){toast('銘柄が選択されていません',1);return;}
-  if(!isMarketOpen()){toast('現在は取引時間外です',1);return;}
   var s=D.stocks&&D.stocks[code];var marketPrice=s&&s.price!=null?s.price:null;
+  var isLimit=_tsOrderType==='limit';
   var price;
-  if(_tsOrderType==='limit'){
+  if(isLimit){
     price=parseFloat(document.getElementById('ts-limit-price').value)||null;
     if(!price||price<=0){toast('指値価格を入力してください',1);return;}
   }else{
     price=marketPrice;
-    if(!price){toast('株価データがありません',1);return;}
+    if(!price&&isMarketOpen()){toast('株価データがありません',1);return;}
   }
   var qty=parseInt(document.getElementById('ts-qty').value)||0;
   if(qty<100){toast('株数は100株以上で入力してください',1);return;}
   var today=new Date();
   var dateStr=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
-  // 指値注文：注文中として保存
-  if(_tsOrderType==='limit'){
+  var dtIso=today.toISOString();
+  // 取引時間外 or 指値注文 → 注文中として保存
+  if(!isMarketOpen()||isLimit){
     if(!D.pendingOrders)D.pendingOrders=[];
     if(_tsType==='sell'){
       if(!D.trades)D.trades=[];
-      var hasBuyL=D.trades.some(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;});
-      if(!hasBuyL){toast('この銘柄の買いポジションがありません',1);return;}
-    }else{
+      var hasBuyP=D.trades.some(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;});
+      if(!hasBuyP){toast('この銘柄の買いポジションがありません',1);return;}
+    }else if(isLimit){
+      // 指値買い：資金仮押さえ
       var limitCost=Math.round(price)*qty;
       if((D.vtRemain||0)<limitCost){toast('残り資金が不足しています',1);return;}
       D.vtRemain=(D.vtRemain||0)-limitCost;
     }
-    D.pendingOrders.push({id:Date.now(),code:code,type:_tsType,limitPrice:Math.round(price),qty:qty,date:dateStr,status:'pending'});
+    // 成行買い（時間外）は約定時に資金チェック・控除するので仮押さえしない
+    D.pendingOrders.push({id:Date.now(),code:code,type:_tsType,orderType:isLimit?'limit':'market',limitPrice:isLimit?Math.round(price):null,qty:qty,date:dateStr,datetime:dtIso,status:'pending'});
     save();closeTradeSheet();_rtHash=null;renderT();
-    toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'[指値]注文を受け付けました ('+Math.round(price).toLocaleString()+'円)');
+    renderChartPendingOrders(code);
+    var outside=!isMarketOpen();
+    toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'['+(isLimit?'指値':'成行')+']注文を受け付けました'+(outside?'（取引時間外・時間内に自動約定）':''));
     return;
   }
-  // 成行注文：即時約定
+  // 成行・取引時間内 → 即時約定
   if(!D.trades)D.trades=[];
   if(_tsType==='sell'){
     var hasBuy=D.trades.filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');}).length>0;
