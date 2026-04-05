@@ -913,9 +913,9 @@ async function one(c){
     checkLimitOrders(c,r.price);
     save();
  }catch(e){s.upd='エラー: '+e.message;save();}
-  // render()経由で次フレームに更新（_renderedCodesキャッシュを活用し再アニメーションを防ぐ）
-  cancelAnimationFrame(window._gridRafTimer);
-  window._gridRafTimer=requestAnimationFrame(render);
+  // render()経由で200ms debounce後に更新（_renderedCodesキャッシュを活用し再アニメーションを防ぐ）
+  clearTimeout(window._gridRafTimer);
+  window._gridRafTimer=setTimeout(function(){requestAnimationFrame(render);},200);
 }
 
 async function all(){
@@ -2550,7 +2550,16 @@ function openTradeSheet(){
   updateTotal();
   document.getElementById('tradeSheet').style.display='flex';
 }
-function closeTradeSheet(){document.getElementById('tradeSheet').style.display='none';}
+function closeTradeSheet(){
+  var el=document.getElementById('tradeSheet');
+  el.style.display='none';
+  el.style.webkitTransform='';
+  el.style.transform='';
+  el.style.willChange='auto';
+  el.style.pointerEvents='none';
+  // Safari GPU レイヤー強制解放
+  requestAnimationFrame(function(){el.style.pointerEvents='';});
+}
 function selectTradeType(type){
   _tsType=type;
   var b=document.getElementById('ts-buy-btn'),s=document.getElementById('ts-sell-btn'),sub=document.getElementById('ts-submit');
@@ -2623,8 +2632,8 @@ function submitTradeSheet(){
     }
     // 成行買い（時間外）は約定時に資金チェック・控除するので仮押さえしない
     D.pendingOrders.push({id:Date.now(),code:code,type:_tsType,orderType:isLimit?'limit':'market',limitPrice:isLimit?Math.round(price):null,qty:qty,date:dateStr,datetime:dtIso,status:'pending'});
-    save();closeTradeSheet();_rtHash=null;renderT();
-    renderChartPendingOrders(code);
+    save();closeTradeSheet();_rtHash=null;
+    setTimeout(function(){renderT();renderChartPendingOrders(code);},200);
     var outside=!isMarketOpen();
     toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'['+(isLimit?'指値':'成行')+']注文を受け付けました'+(outside?'（取引時間外・時間内に自動約定）':''));
     return;
@@ -2645,7 +2654,7 @@ function submitTradeSheet(){
   D.trades.push({id:Date.now(),code:code,type:_tsType,date:dateStr,price:Math.round(price),qty:qty,memo:'',orderType:'market'});
   save();closeTradeSheet();
   toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'[成行]約定しました ('+Math.round(price).toLocaleString()+'円×'+qty+'株)');
-  renderT();
+  setTimeout(function(){renderT();},200);
 }
 document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.target===this)closeTradeSheet();});
 </script>
