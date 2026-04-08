@@ -1912,6 +1912,124 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 // ===== WALKTHROUGH END =====
 
+// ===== 起動時遡り約定チェック =====
+async function checkPendingOrdersOnStartup(){
+  // セッション内で1度だけ実行
+  if(sessionStorage.getItem('_backfillDone'))return;
+  sessionStorage.setItem('_backfillDone','1');
+
+  var pending=(D.pendingOrders||[]).filter(function(o){return o.status==='pending';});
+  if(!pending.length)return;
+
+  // コードごとにまとめてAPIコール
+  var codeMap={};
+  pending.forEach(function(o){if(!codeMap[o.code])codeMap[o.code]=[];codeMap[o.code].push(o);});
+
+  var toastQueue=[];
+
+  for(var code of Object.keys(codeMap)){
+    try{
+      var res=await fetch('/api/stock?code='+encodeURIComponent(code)+'&interval=1d&range=5d');
+      var data=await res.json();
+      var ch=data&&data.chart&&data.chart.result&&data.chart.result[0];
+      if(!ch)continue;
+      var q=ch.indicators.quote[0];
+      var ts=ch.timestamp;
+
+      // 日足バーを日付文字列でまとめ（重複除去・ソート）
+      var days=[],seen={};
+      for(var i=0;i<ts.length;i++){
+        if(q.open[i]==null||q.high[i]==null||q.low[i]==null||q.close[i]==null)continue;
+        var ds=toDS(ts[i]);
+        if(seen[ds])continue;
+        seen[ds]=true;
+        days.push({date:ds,open:q.open[i],high:q.high[i],low:q.low[i],close:q.close[i]});
+      }
+      days.sort(function(a,b){return a.date.localeCompare(b.date);});
+
+      codeMap[code].forEach(function(o){
+        if(o.status!=='pending')return;
+        if(!o.datetime)return;
+
+        // 注文日をJST日付文字列に変換
+        var orderJSTDate=toDS(Math.floor(new Date(o.datetime).getTime()/1000));
+
+        var execDay=null,execPrice=null;
+
+        if(o.orderType==='market'){
+          // 成行：注文翌日以降の最初の始値で約定
+          var afterDays=days.filter(function(d){return d.date>orderJSTDate;});
+          if(!afterDays.length)return;
+          execDay=afterDays[0];
+          execPrice=execDay.open;
+        }else if(o.orderType==='limit'){
+          // 指値：注文日以降で条件を満たす最初の日
+          var fromDays=days.filter(function(d){return d.date>=orderJSTDate;});
+          for(var j=0;j<fromDays.length;j++){
+            var d=fromDays[j];
+            if(o.type==='buy'&&d.low<=o.limitPrice){execDay=d;execPrice=o.limitPrice;break;}
+            if(o.type==='sell'&&d.high>=o.limitPrice){execDay=d;execPrice=o.limitPrice;break;}
+          }
+        }
+
+        if(!execDay||execPrice==null)return;
+
+        var dateStr=execDay.date;
+        if(!D.trades)D.trades=[];
+
+        if(o.type==='buy'){
+          if(o.orderType==='market'){
+            var cost=Math.round(execPrice)*o.qty;
+            if((D.vtRemain||0)<cost){
+              o.status='cancelled';
+              var sN=D.stocks&&D.stocks[o.code]?D.stocks[o.code].name:o.code;
+              toastQueue.push({msg:sN+' 成行注文をキャンセル（資金不足）',err:1,col:null});
+              return;
+            }
+            D.vtRemain=(D.vtRemain||0)-cost;
+          }
+          o.status='filled';
+          D.trades.push({id:Date.now()+Math.floor(Math.random()*10000),code:o.code,type:'buy',date:dateStr,price:Math.round(execPrice),qty:o.qty,memo:o.orderType==='market'?'成行約定':'指値約定',orderType:o.orderType});
+        }else{
+          var remains=o.qty,rPnl=0;
+          var bList=(D.trades||[]).filter(function(t){return t.code===o.code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+          if(!bList.length){
+            o.status='cancelled';
+            toastQueue.push({msg:o.code+' 売り注文をキャンセル（買いポジションなし）',err:1,col:null});
+            return;
+          }
+          for(var k=0;k<bList.length&&remains>0;k++){
+            var b=bList[k];var use=Math.min(b.qty,remains);
+            rPnl+=(execPrice-b.price)*use;b.qty-=use;remains-=use;
+          }
+          D.trades=(D.trades||[]).filter(function(t){return !(t.qty===0&&(t.type==='buy'||t.type==='mbuy'));});
+          D.realizedPnl=(D.realizedPnl||0)+rPnl;
+          D.vtRemain=(D.vtRemain||0)+Math.round(execPrice)*o.qty;
+          o.status='filled';
+          D.trades.push({id:Date.now()+Math.floor(Math.random()*10000),code:o.code,type:'sell',date:dateStr,price:Math.round(execPrice),qty:o.qty,memo:o.orderType==='market'?'成行約定':'指値約定'});
+        }
+
+        var sName=D.stocks&&D.stocks[o.code]?D.stocks[o.code].name:o.code;
+        var fillLabel=o.orderType==='market'?'成行注文':'指値注文';
+        toastQueue.push({msg:'📋 '+sName+' '+fillLabel+'が約定しました ('+(o.type==='buy'?'買い':'売り')+' '+Math.round(execPrice).toLocaleString()+'円×'+o.qty+'株)',err:0,col:'#ffe066'});
+      });
+    }catch(e){console.warn('backfill check error:',code,e);}
+  }
+
+  D.pendingOrders=(D.pendingOrders||[]).filter(function(o){return o.status==='pending';});
+
+  if(toastQueue.length){
+    save();
+    if(typeof _rtHash!=='undefined')_rtHash=null;
+    if(typeof renderT==='function')renderT();
+    // トーストを順次表示（3.5秒間隔）
+    toastQueue.forEach(function(t,i){
+      setTimeout(function(){toast(t.msg,t.err,t.col);},i*3500);
+    });
+  }
+}
+// ===== 遡り約定チェック END =====
+
 window.addEventListener('pagehide',function(){try{if(sessionStorage.getItem('_reloadTab'))return;}catch(e){}var active=['market','account','search','menu'].find(function(t){var el=document.getElementById('bn-'+t);return el&&el.classList.contains('active');});if(active){try{localStorage.setItem('_lastTab',active);}catch(e){}}});
 document.addEventListener('DOMContentLoaded', function(){
   D=load();
@@ -1926,6 +2044,8 @@ document.addEventListener('DOMContentLoaded', function(){
     tmr=setInterval(all,(D.iv||5)*60000);
     setSt('on','監視中');
   }
+  // 起動時遡り約定チェック（注文中がある場合のみ実行）
+  setTimeout(checkPendingOrdersOnStartup, 800);
   // bnavにtouchendリスナーを直接追加
   // touchmoveでe.preventDefault()が呼ばれた後でもonclickに依存せず確実にbnGo()を呼ぶ
   ['market','account','search','menu'].forEach(function(tab){
