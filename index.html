@@ -2621,7 +2621,7 @@ function openGlossary(){
       <input id="ts-limit-price" type="number" min="1" step="1" style="width:100%;box-sizing:border-box;text-align:right;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;" oninput="updateTotal()">
     </div>
     <div style="margin-bottom:12px;">
-      <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">株数（100株単位）</label>
+      <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">株数（100株単位）<span id="ts-sell-hold-info" style="display:none;color:#ff4d6d;margin-left:8px;font-weight:700;"></span></label>
       <div style="display:flex;align-items:center;gap:8px;">
         <button onclick="adjustQty(-100)" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
         <input id="ts-qty" type="number" value="100" min="100" step="100" style="flex:1;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;" oninput="updateTotal()">
@@ -2638,15 +2638,17 @@ function openGlossary(){
 <script>
 var _tsType='buy';
 var _tsOrderType='market';
+var _tsHoldQty=0;
 function openTradeSheet(){
   var code=selCode;if(!code)return;
   var s=D.stocks[code];
   document.getElementById('ts-name').textContent=(s?s.name:'')+' ('+code+')';
   document.getElementById('ts-price').textContent='現在値：'+(s&&s.price!=null?s.price.toLocaleString()+'円':'---');
   var buys=(D.trades||[]).filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');});
+  _tsHoldQty=buys.reduce(function(a,t){return a+t.qty;},0);
   var posDiv=document.getElementById('ts-position');
   if(buys.length>0&&s&&s.price!=null){
-    var holdQty=buys.reduce(function(a,t){return a+t.qty;},0);
+    var holdQty=_tsHoldQty;
     var holdVal=Math.round(s.price*holdQty);
     var avgPrice=buys.reduce(function(a,t){return a+t.price*t.qty;},0)/holdQty;
     var pnl=Math.round((s.price-avgPrice)*holdQty);
@@ -2683,14 +2685,18 @@ function closeTradeSheet(){
 function selectTradeType(type){
   _tsType=type;
   var b=document.getElementById('ts-buy-btn'),s=document.getElementById('ts-sell-btn'),sub=document.getElementById('ts-submit');
+  var holdInfo=document.getElementById('ts-sell-hold-info');
   if(type==='buy'){
     b.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #00ff9d;background:rgba(0,255,157,.15);color:#00ff9d;cursor:pointer;';
     s.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
     sub.style.background='#00ff9d';sub.style.color='#000';sub.textContent='買い注文する';
+    holdInfo.style.display='none';
   }else{
     s.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #ff4d6d;background:rgba(255,77,109,.15);color:#ff4d6d;cursor:pointer;';
     b.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
     sub.style.background='#ff4d6d';sub.style.color='#fff';sub.textContent='売り注文する';
+    holdInfo.textContent='保有：'+(_tsHoldQty||0).toLocaleString()+'株';
+    holdInfo.style.display='inline';
   }
   updateTotal();
 }
@@ -2742,8 +2748,9 @@ function submitTradeSheet(){
     if(!D.pendingOrders)D.pendingOrders=[];
     if(_tsType==='sell'){
       if(!D.trades)D.trades=[];
-      var hasBuyP=D.trades.some(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy')&&t.qty>0;});
-      if(!hasBuyP){toast('この銘柄の買いポジションがありません',1);return;}
+      var holdQtyP=(D.trades||[]).filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');}).reduce(function(a,t){return a+t.qty;},0);
+      if(holdQtyP<=0){toast('この銘柄の買いポジションがありません',1);return;}
+      if(qty>holdQtyP){toast('保有株数（'+holdQtyP.toLocaleString()+'株）を超えて売ることはできません',1);return;}
     }else if(isLimit){
       // 指値買い：資金仮押さえ
       var limitCost=Math.round(price)*qty;
@@ -2761,8 +2768,9 @@ function submitTradeSheet(){
   // 成行・取引時間内 → 即時約定
   if(!D.trades)D.trades=[];
   if(_tsType==='sell'){
-    var hasBuy=D.trades.filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');}).length>0;
-    if(!hasBuy){toast('この銘柄の買いポジションがありません',1);return;}
+    var holdQtyI=D.trades.filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');}).reduce(function(a,t){return a+t.qty;},0);
+    if(holdQtyI<=0){toast('この銘柄の買いポジションがありません',1);return;}
+    if(qty>holdQtyI){toast('保有株数（'+holdQtyI.toLocaleString()+'株）を超えて売ることはできません',1);return;}
     var remain=qty,realizedPnl=0;
     var buys=D.trades.filter(function(t){return t.code===code&&(t.type==='buy'||t.type==='mbuy');}).sort(function(a,b){return a.date.localeCompare(b.date);});
     for(var i=0;i<buys.length&&remain>0;i++){var b=buys[i];var use=Math.min(b.qty,remain);realizedPnl+=(price-b.price)*use;if(use>=b.qty){D.trades=D.trades.filter(function(t){return t.id!==b.id;});}else{b.qty-=use;}remain-=use;}
