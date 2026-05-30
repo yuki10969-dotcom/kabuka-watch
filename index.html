@@ -2935,19 +2935,78 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
 // ==================== 練習モード ====================
 var practiceSession=null,lwCPractice=null,_ptsType='buy',_ptsOrderType='market',_ptsHoldQty=0;
 
+var _psSelectedCode='',_psSelectedName='';
+function _psSelectStock(code,name){
+  _psSelectedCode=code;_psSelectedName=name;
+  var badge=document.getElementById('ps-selected-badge');
+  var startBtn=document.getElementById('ps-start-btn');
+  if(badge){
+    if(code){
+      badge.style.display='flex';
+      badge.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff9d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'+
+        '<span style="font-size:13px;font-weight:700;color:var(--green);">'+name+'</span>'+
+        '<span style="font-size:12px;color:var(--muted);font-family:\'JetBrains Mono\',monospace;">('+code+')</span>';
+    }else{badge.style.display='none';}
+  }
+  if(startBtn){startBtn.disabled=!code;startBtn.style.opacity=code?'1':'0.5';}
+  // 登録銘柄ボタンのハイライト
+  document.querySelectorAll('.ps-stock-btn').forEach(function(b){
+    b.style.borderColor=b.getAttribute('data-code')===code?'var(--cyan)':'var(--border)';
+    b.style.color=b.getAttribute('data-code')===code?'var(--cyan)':'#e2e8f0';
+    b.style.background=b.getAttribute('data-code')===code?'rgba(0,229,255,.1)':'rgba(255,255,255,.06)';
+  });
+}
+async function _psSearchStock(){
+  var inp=document.getElementById('ps-search-input');
+  var resultEl=document.getElementById('ps-search-result');
+  var searchBtn=document.getElementById('ps-search-btn');
+  if(!inp||!resultEl)return;
+  var code=inp.value.trim().toUpperCase();
+  if(!code){resultEl.innerHTML='<span style="font-size:12px;color:var(--muted);">証券コードを入力してください</span>';return;}
+  if(searchBtn){searchBtn.textContent='検索中…';searchBtn.disabled=true;}
+  resultEl.innerHTML='';
+  try{
+    var res=await fetch('/api/stock?code='+encodeURIComponent(code)+'&interval=1d&range=1mo');
+    var data=await res.json();
+    var ch=data&&data.chart&&data.chart.result&&data.chart.result[0];
+    var name=ch&&ch.meta&&(ch.meta.longName||ch.meta.shortName)||'';
+    if(!name){resultEl.innerHTML='<span style="font-size:12px;color:var(--red);">銘柄が見つかりませんでした</span>';}
+    else{
+      name=name.replace(/\s*[（(].*?[)）]/g,'').trim();
+      resultEl.innerHTML='<button onclick="_psSelectStock(\''+code+'\',\''+name.replace(/'/g,'\\\'')+'\')" style="width:100%;padding:10px 12px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.25);border-radius:8px;color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;text-align:left;">'+name+' ('+code+') を選択 →</button>';
+    }
+  }catch(e){resultEl.innerHTML='<span style="font-size:12px;color:var(--red);">取得に失敗しました</span>';}
+  if(searchBtn){searchBtn.textContent='検索';searchBtn.disabled=false;}
+}
 function openPracticeSetup(){
   var old=document.getElementById('practiceSetupModal');if(old)old.remove();
+  _psSelectedCode='';_psSelectedName='';
   var stocks=D.stocks||{};var codes=Object.keys(stocks);
-  if(!codes.length){toast('練習するには銘柄を登録してください',1);return;}
-  var options=codes.map(function(c){return '<option value="'+c+'">'+(stocks[c].name||c)+' ('+c+')</option>';}).join('');
+  var registeredHTML='';
+  if(codes.length){
+    registeredHTML='<div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">登録済み銘柄から選ぶ</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">';
+    codes.forEach(function(c){
+      var n=stocks[c].name||c;
+      registeredHTML+='<button class="ps-stock-btn" data-code="'+c+'" onclick="_psSelectStock(\''+c+'\',\''+n.replace(/'/g,'\\\'')+'\')" style="padding:7px 12px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">'+n+'<span style="color:var(--muted);font-size:10px;margin-left:4px;font-family:\'JetBrains Mono\',monospace;">'+c+'</span></button>';
+    });
+    registeredHTML+='</div>';
+  }
   var ov=document.createElement('div');
   ov.id='practiceSetupModal';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;';
-  ov.innerHTML='<div style="background:#1a1f2e;border-radius:16px;padding:24px 20px;width:100%;max-width:360px;border:1px solid rgba(179,136,255,.3);max-height:90vh;overflow-y:auto;">'+
+  ov.innerHTML='<div style="background:#1a1f2e;border-radius:16px;padding:24px 20px;width:100%;max-width:380px;border:1px solid rgba(179,136,255,.3);max-height:92vh;overflow-y:auto;">'+
     '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#b388ff;margin-bottom:8px;">PRACTICE MODE</div>'+
-    '<div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:20px;">過去データで練習</div>'+
-    '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">練習銘柄</label>'+
-    '<select id="ps-code" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;margin-bottom:14px;outline:none;-webkit-appearance:none;">'+options+'</select>'+
+    '<div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:16px;">過去データで練習</div>'+
+    '<div id="ps-selected-badge" style="display:none;align-items:center;gap:8px;background:rgba(0,255,157,.07);border:1px solid rgba(0,255,157,.25);border-radius:10px;padding:10px 14px;margin-bottom:16px;"></div>'+
+    '<div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:6px;">銘柄を選ぶ</div>'+
+    registeredHTML+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">'+(codes.length?'または銘柄コードで検索':'銘柄コードで検索')+'</div>'+
+    '<div style="display:flex;gap:6px;margin-bottom:6px;">'+
+    '<input id="ps-search-input" type="text" inputmode="numeric" placeholder="例：7203" style="flex:1;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:\'JetBrains Mono\',monospace;outline:none;" onkeydown="if(event.key===\'Enter\')_psSearchStock()">'+
+    '<button id="ps-search-btn" onclick="_psSearchStock()" style="padding:10px 16px;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);border-radius:8px;color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">検索</button>'+
+    '</div>'+
+    '<div id="ps-search-result" style="margin-bottom:16px;min-height:20px;"></div>'+
     '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">開始日</label>'+
     '<input id="ps-date" type="date" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;margin-bottom:14px;outline:none;" />'+
     '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">初期資産</label>'+
@@ -2960,7 +3019,7 @@ function openPracticeSetup(){
     '<input id="ps-budget" type="text" inputmode="numeric" placeholder="1,000,000" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:\'JetBrains Mono\',monospace;margin-bottom:20px;outline:none;" oninput="_fmtPsBudget(this)" />'+
     '<div style="display:flex;gap:10px;">'+
     '<button onclick="document.getElementById(\'practiceSetupModal\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;">キャンセル</button>'+
-    '<button id="ps-start-btn" onclick="startPractice()" style="flex:1;padding:12px;background:rgba(179,136,255,.2);border:1px solid rgba(179,136,255,.4);border-radius:10px;color:#b388ff;font-size:13px;font-weight:700;cursor:pointer;">スタート</button>'+
+    '<button id="ps-start-btn" onclick="startPractice()" disabled style="flex:1;padding:12px;background:rgba(179,136,255,.2);border:1px solid rgba(179,136,255,.4);border-radius:10px;color:#b388ff;font-size:13px;font-weight:700;cursor:pointer;opacity:.5;">スタート</button>'+
     '</div></div>';
   document.body.appendChild(ov);
   ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
@@ -2970,16 +3029,19 @@ function openPracticeSetup(){
   dateEl.max=new Date().toISOString().slice(0,10);
   dateEl.min='2019-01-01';
   _setPsBudget(1000000);
+  // 登録済みが1件だけなら自動選択
+  if(codes.length===1)_psSelectStock(codes[0],(stocks[codes[0]].name||codes[0]));
 }
 function _setPsBudget(n){var el=document.getElementById('ps-budget');if(el)el.value=n.toLocaleString();}
 function _fmtPsBudget(el){var raw=el.value.replace(/,/g,'').replace(/[^\d]/g,'');var n=parseInt(raw)||0;el.value=n?n.toLocaleString():'';}
 function _parsePsBudget(){var el=document.getElementById('ps-budget');if(!el)return 1000000;return parseInt((el.value||'').replace(/,/g,''))||1000000;}
 
 async function startPractice(){
-  var code=document.getElementById('ps-code').value;
+  var code=_psSelectedCode;
   var startDate=document.getElementById('ps-date').value;
   var budget=_parsePsBudget();
-  if(!code||!startDate){toast('銘柄と開始日を設定してください',1);return;}
+  if(!code){toast('練習する銘柄を選んでください',1);return;}
+  if(!startDate){toast('開始日を設定してください',1);return;}
   var btn=document.getElementById('ps-start-btn');
   if(btn){btn.textContent='データ取得中...';btn.disabled=true;}
   try{
@@ -2997,7 +3059,7 @@ async function startPractice(){
     allData.sort(function(a,b){return a.date.localeCompare(b.date);});
     var startIdx=allData.findIndex(function(d){return d.date>=startDate;});
     if(startIdx<0){toast('指定期間のデータがありません',1);if(btn){btn.textContent='スタート';btn.disabled=false;}return;}
-    var stockName=(D.stocks[code]&&D.stocks[code].name)||code;
+    var stockName=_psSelectedName||((D.stocks[code]&&D.stocks[code].name)||code);
     practiceSession={code:code,stockName:stockName,allData:allData,currentIdx:startIdx,budget:budget,remain:budget,trades:[],pendingOrders:[],realizedPnl:0};
     document.getElementById('practiceSetupModal').remove();
     document.getElementById('practicePanel').style.display='block';
