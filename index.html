@@ -649,7 +649,7 @@ function addS(){
   if(D.stocks[c]){toast('⚠️ すでに登録済みです',1);return}
   if(Object.keys(D.stocks).length>=3){toast('⚠️ 登録できる銘柄は3件までです',1);return}
   D.stocks[c]={name:n,tp:p?parseInt(p):null,ri:r?parseInt(r):null,uma:ma,upb:pb,price:null,chg:null,rd:null,rw:null,m5:null,m25:null,pc:null,pa:null,upd:null,alts:[]};
-save();closeM();render();toast('✅ '+n+'（'+c+'）を追加しました');clearInterval(tmr);tmr=setInterval(all,(D.iv||5)*60000);setTimeout(function(){one(c);},500);
+save();closeM();render();toast('✅ '+n+'（'+c+'）を追加しました');clearInterval(tmr);tmr=setInterval(all,(D.iv||5)*60000);setTimeout(function(){one(c);},500);if(typeof kabtOnFirstStock==='function')kabtOnFirstStock();
 var sp=document.getElementById('bp-search');
 if(sp&&sp.style.display!=='none'){
   document.getElementById('sp-input').value='';
@@ -2066,6 +2066,12 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   // 起動時遡り約定チェック（注文中がある場合のみ実行）
   setTimeout(checkPendingOrdersOnStartup, 800);
+  // カブトレちゃんガイド
+  setTimeout(function(){
+    if(typeof showFirstLaunchGuide==='function')showFirstLaunchGuide();
+    else if(typeof kabtCheckEmpty==='function'&&lastTab==='market')kabtCheckEmpty();
+  }, 1500);
+  if(lastTab==='market'&&typeof kabtCheckEmpty==='function')setTimeout(kabtCheckEmpty, 1600);
   // bnavにtouchendリスナーを直接追加
   // touchmoveでe.preventDefault()が呼ばれた後でもonclickに依存せず確実にbnGo()を呼ぶ
   ['market','account','search','menu'].forEach(function(tab){
@@ -2154,6 +2160,7 @@ if('serviceWorker' in navigator){
   </div>
   <div style="display:flex;flex-direction:column;gap:10px;">
    <button onclick="openHowTo();bnGo('market')" style="background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:10px;padding:14px 16px;width:100%;text-align:left;color:#e2e8f0;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>使い方ガイド</button>
+    <button onclick="openKabutoreHelp()" style="background:rgba(179,136,255,.07);border:1px solid rgba(179,136,255,.2);border-radius:10px;padding:12px 16px;width:100%;text-align:left;color:#b388ff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b388ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>カブトレちゃんに聞く</button>
     <button onclick="openGlossary();bnGo('market')" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:left;color:#e2e8f0;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:12px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>用語解説</button>
     <a id="menu-walkthrough-link" href="/walkthrough.html" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:left;color:#e2e8f0;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:12px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>はじめての方はこちら</a>
     <div id="menu-start-section" style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;">
@@ -2313,6 +2320,7 @@ if(tab==='search'){
     return;
   }
   window.scrollTo({top:0,behavior:'instant'});
+  if(typeof kabtCheckEmpty==='function')setTimeout(kabtCheckEmpty, 400);
 }
 </script>
 
@@ -2871,10 +2879,12 @@ function submitTradeSheet(){
     var cost=price*qty;if((D.vtRemain||0)<cost){toast('残り資金が不足しています',1);return;}
     D.vtRemain=(D.vtRemain||0)-cost;
   }
+  var _isFirstTrade=!(D.trades&&D.trades.length);
   D.trades.push({id:Date.now(),code:code,type:_tsType,date:dateStr,price:Math.round(price),qty:qty,memo:'',orderType:'market'});
   save();closeTradeSheet();
   toast((_tsType==='buy'?'🟢 買い':'🔴 売り')+'[成行]約定しました ('+Math.round(price).toLocaleString()+'円×'+qty+'株)');
   setTimeout(function(){renderT();},200);
+  if(_isFirstTrade&&typeof kabtOnFirstTrade==='function')kabtOnFirstTrade();
 }
 document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.target===this)closeTradeSheet();});
 </script>
@@ -3403,6 +3413,144 @@ function closePracticeSummary(){
 
 document.getElementById('practiceTradeSheet').addEventListener('click',function(e){if(e.target===this)closePracticeTradeSheet();});
 // ==================== 練習モード END ====================
+</script>
+<script>
+// ==================== カブトレちゃんガイド ====================
+(function(){var s=document.createElement('style');s.textContent='@keyframes kabtIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}#kabutore-popup{transition:opacity .2s;}';document.head.appendChild(s);})();
+
+var _kabtQueue=[],_kabtTimer2=null;
+
+function _kabtEnsureEl(){
+  if(document.getElementById('kabutore-popup'))return;
+  var el=document.createElement('div');
+  el.id='kabutore-popup';
+  el.style.cssText='position:fixed;bottom:68px;left:0;right:0;z-index:550;display:none;padding:0 14px;';
+  el.innerHTML='<div style="display:flex;align-items:flex-end;gap:8px;max-width:480px;margin:0 auto;cursor:pointer;" onclick="_kabtTap()">'+
+    '<div style="flex-shrink:0;filter:drop-shadow(0 0 10px rgba(0,229,255,.35));">'+_kabutoreSVG(68)+'</div>'+
+    '<div id="kabutore-bubble" style="flex:1;background:#0d1a2e;border:1.5px solid var(--cyan);border-radius:14px 14px 14px 0;padding:12px 14px;box-shadow:0 6px 28px rgba(0,0,0,.65);animation:kabtIn .3s ease;">'+
+      '<div id="kabutore-text" style="font-size:14px;line-height:1.65;color:var(--text);font-weight:600;"></div>'+
+      '<div id="kabutore-hint" style="font-size:10px;color:var(--muted);margin-top:5px;text-align:right;letter-spacing:.3px;"></div>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(el);
+}
+
+function showKabutore(msg,duration){
+  _kabtEnsureEl();
+  clearTimeout(_kabtTimer2);_kabtQueue=[];
+  var textEl=document.getElementById('kabutore-text');
+  var hintEl=document.getElementById('kabutore-hint');
+  var bubble=document.getElementById('kabutore-bubble');
+  var el=document.getElementById('kabutore-popup');
+  if(!el||!textEl)return;
+  textEl.textContent=msg;
+  if(hintEl)hintEl.textContent='タップで閉じる';
+  if(bubble){bubble.style.animation='none';void bubble.offsetWidth;bubble.style.animation='kabtIn .3s ease';}
+  el.style.display='block';
+  if(duration>0)_kabtTimer2=setTimeout(hideKabutore,duration);
+}
+
+function showKabutoreSequence(msgs){
+  if(!msgs||!msgs.length)return;
+  _kabtEnsureEl();
+  clearTimeout(_kabtTimer2);
+  _kabtQueue=msgs.slice(1);
+  var textEl=document.getElementById('kabutore-text');
+  var hintEl=document.getElementById('kabutore-hint');
+  var bubble=document.getElementById('kabutore-bubble');
+  var el=document.getElementById('kabutore-popup');
+  if(!el||!textEl)return;
+  textEl.textContent=msgs[0];
+  if(hintEl)hintEl.textContent=_kabtQueue.length>0?'タップで次へ (1 / '+msgs.length+')':'タップで閉じる';
+  if(bubble){bubble.style.animation='none';void bubble.offsetWidth;bubble.style.animation='kabtIn .3s ease';}
+  el.style.display='block';
+}
+
+function hideKabutore(){
+  clearTimeout(_kabtTimer2);_kabtQueue=[];
+  var el=document.getElementById('kabutore-popup');
+  if(el)el.style.display='none';
+}
+
+function _kabtTap(){
+  if(_kabtQueue.length>0){
+    var total=_kabtQueue.length;
+    var next=_kabtQueue.shift();
+    var textEl=document.getElementById('kabutore-text');
+    var hintEl=document.getElementById('kabutore-hint');
+    var bubble=document.getElementById('kabutore-bubble');
+    if(textEl)textEl.textContent=next;
+    if(hintEl)hintEl.textContent=_kabtQueue.length>0?'タップで次へ':'タップで閉じる';
+    if(bubble){bubble.style.animation='none';void bubble.offsetWidth;bubble.style.animation='kabtIn .3s ease';}
+  }else{hideKabutore();}
+}
+
+// ── 初回起動ガイド ──
+function showFirstLaunchGuide(){
+  var existing=null;try{existing=localStorage.getItem('kbk4');}catch(e){}
+  if(existing)return;
+  showKabutoreSequence([
+    'はじめまして！カブトレちゃんだよ！',
+    'このアプリで日本株のバーチャルトレードを練習できるよ！',
+    'まずはメニューの「はじめての方はこちら」から始めてみてね！'
+  ]);
+}
+
+// ── 各場面トリガー ──
+var _kabtShownEmpty=false;
+function kabtCheckEmpty(){
+  if(_kabtShownEmpty)return;
+  if(Object.keys(D&&D.stocks||{}).length>0)return;
+  _kabtShownEmpty=true;
+  showKabutore('銘柄を登録してチャートを見てみよう！',3000);
+}
+
+function kabtOnFirstStock(){
+  if(Object.keys(D&&D.stocks||{}).length!==1)return;
+  _kabtShownEmpty=true; // 空表示は不要になる
+  setTimeout(function(){showKabutore('登録したよ！チャートをタップして確認してみてね！',4000);},800);
+}
+
+function kabtOnFirstTrade(){
+  setTimeout(function(){showKabutore('最初の取引おめでとう！口座管理タブで損益を確認してみてね！',4000);},600);
+}
+
+// ── カブトレちゃんに聞く ──
+var _kabtTopics=[
+  {label:'銘柄の登録方法', msgs:['下の「銘柄検索」タブから証券コードや銘柄名を入力して検索してみよう！','検索結果の「追加」ボタンをタップすると登録できるよ。最大3銘柄まで登録可能だよ！']},
+  {label:'買い方・売り方', msgs:['マーケットタブの銘柄カードを開いてチャートの「取引する」ボタンをタップしよう！','「成行」は現在値で即約定、「指値」は希望価格を入力して注文できるよ。取引時間外は翌営業日に自動約定されるよ！']},
+  {label:'口座管理の見方', msgs:['下の「口座管理」タブを開いてみよう！','「ポジション」で保有中の銘柄と評価損益、「取引履歴」で売買記録、「資産推移」でグラフを確認できるよ！']},
+  {label:'練習モードの使い方', msgs:['メニューの「過去データで練習」から過去の株価でトレード練習ができるよ！','銘柄・開始日・初期資産を選んでスタート。「次の日へ」ボタンで1日ずつ進めながら取引できるよ。リアル口座には影響しないから安心してね！']}
+];
+
+function openKabutoreHelp(){
+  var old=document.getElementById('kabutoreHelpModal');if(old)old.remove();
+  var btnsHTML=_kabtTopics.map(function(t,i){
+    return '<button onclick="_kabtHelpSelect('+i+')" style="width:100%;padding:12px 14px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.12);border-radius:10px;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;text-align:left;display:flex;align-items:center;gap:10px;">'+
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b388ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'+
+      t.label+'</button>';
+  }).join('');
+  var ov=document.createElement('div');
+  ov.id='kabutoreHelpModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:flex;align-items:flex-end;justify-content:center;';
+  ov.innerHTML='<div style="background:#1a1f2e;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:480px;border-top:2px solid rgba(179,136,255,.3);">'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">'+
+    _kabutoreSVG(60)+
+    '<div><div style="font-size:15px;font-weight:900;color:#b388ff;">カブトレちゃんに聞く</div><div style="font-size:12px;color:var(--muted);margin-top:2px;">知りたいことをタップしてね！</div></div>'+
+    '</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">'+btnsHTML+'</div>'+
+    '<button onclick="document.getElementById(\'kabutoreHelpModal\').remove()" style="width:100%;padding:11px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:13px;cursor:pointer;">とじる</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+}
+
+function _kabtHelpSelect(i){
+  var t=_kabtTopics[i];if(!t)return;
+  var old=document.getElementById('kabutoreHelpModal');if(old)old.remove();
+  showKabutoreSequence(t.msgs);
+}
+// ==================== カブトレガイド END ====================
 </script>
 </body>
 </html>
