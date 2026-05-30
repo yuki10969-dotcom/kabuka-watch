@@ -56,6 +56,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 </div>
 
 <script>
+var SVG_KABUTORE = '<svg width="100" viewBox="-80 -40 160 200" xmlns="http://www.w3.org/2000/svg"><ellipse cx="0" cy="154" rx="56" ry="8" fill="#000" opacity="0.1"/><rect x="-32" y="136" width="24" height="16" rx="8" fill="#0a1628" stroke="#00e5ff" stroke-width="2"/><rect x="8" y="136" width="24" height="16" rx="8" fill="#0a1628" stroke="#00e5ff" stroke-width="2"/><circle cx="0" cy="70" r="72" fill="#0d1f3c" stroke="#00e5ff" stroke-width="2.5"/><rect x="-80" y="78" width="26" height="14" rx="7" fill="#0a1628" stroke="#00e5ff" stroke-width="2"/><rect x="54" y="78" width="26" height="14" rx="7" fill="#0a1628" stroke="#00e5ff" stroke-width="2"/><line x1="0" y1="-2" x2="0" y2="-20" stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round"/><circle cx="0" cy="-26" r="7" fill="#0a1628" stroke="#00e5ff" stroke-width="2"/><circle cx="0" cy="-26" r="3.5" fill="#00e5ff"/><circle cx="-22" cy="52" r="16" fill="#001829" stroke="#00e5ff" stroke-width="2"/><circle cx="22" cy="52" r="16" fill="#001829" stroke="#00e5ff" stroke-width="2"/><circle cx="-22" cy="52" r="8" fill="#00e5ff" opacity="0.85"/><circle cx="22" cy="52" r="8" fill="#00e5ff" opacity="0.85"/><circle cx="-17" cy="47" r="3.5" fill="white" opacity="0.8"/><circle cx="27" cy="47" r="3.5" fill="white" opacity="0.8"/><circle cx="-22" cy="52" r="3.5" fill="#003344"/><circle cx="22" cy="52" r="3.5" fill="#003344"/><path d="M-12 86 Q0 96 12 86" fill="none" stroke="#00ff9d" stroke-width="2.5" stroke-linecap="round"/><line x1="-52" y1="68" x2="-52" y2="72" stroke="#ff4d6d" stroke-width="1.5" stroke-linecap="round"/><rect x="-55" y="72" width="6" height="8" rx="1.5" fill="#ff4d6d" opacity="0.9"/><line x1="-52" y1="80" x2="-52" y2="84" stroke="#ff4d6d" stroke-width="1.5" stroke-linecap="round"/><line x1="-42" y1="66" x2="-42" y2="70" stroke="#00ff9d" stroke-width="1.5" stroke-linecap="round"/><rect x="-45" y="70" width="6" height="11" rx="1.5" fill="#00ff9d" opacity="0.9"/><line x1="-42" y1="81" x2="-42" y2="85" stroke="#00ff9d" stroke-width="1.5" stroke-linecap="round"/><line x1="42" y1="68" x2="42" y2="72" stroke="#ff4d6d" stroke-width="1.5" stroke-linecap="round"/><rect x="39" y="72" width="6" height="8" rx="1.5" fill="#ff4d6d" opacity="0.9"/><line x1="42" y1="80" x2="42" y2="84" stroke="#ff4d6d" stroke-width="1.5" stroke-linecap="round"/><line x1="52" y1="65" x2="52" y2="69" stroke="#00ff9d" stroke-width="1.5" stroke-linecap="round"/><rect x="49" y="69" width="6" height="12" rx="1.5" fill="#00ff9d" opacity="0.9"/><line x1="52" y1="81" x2="52" y2="86" stroke="#00ff9d" stroke-width="1.5" stroke-linecap="round"/></svg>';
 var SVG_USER = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
 var SVG_TARGET = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>';
 var SVG_GRID = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>';
@@ -130,7 +131,8 @@ function render() {
   var isLast = WT.step === WT.steps.length - 1;
 
   var h = '<div class="wt-step">';
-  h += '<div class="wt-emoji">' + step.svg + '</div>';
+  h += '<div class="wt-emoji">' + (WT.step === 0 ? SVG_KABUTORE : step.svg) + '</div>';
+  if(WT.step === 0) h += '<div style="font-size:12px;font-weight:700;color:var(--cyan);text-align:center;margin-top:-4px;margin-bottom:4px;">カブトレちゃん</div>';
   h += '<div class="wt-q">' + step.q + '</div>';
   h += '<div class="wt-sub">' + step.sub + '</div>';
   h += '<div class="wt-opts">';
@@ -193,8 +195,8 @@ function showResult() {
   var goalMsg = {grow:'資産を増やすために、買いサインを見逃さないよう監視します',learn:'学習用に幅広い銘柄を監視して、パターンを学びましょう',save:'安定銘柄を中心に、長期目線で監視します'}[WT.ans.goal] || '';
 
   var h = '<div class="wt-step wt-result">';
-  h += '<div class="wt-emoji">' + SVG_CHECK + '</div>';
-  h += '<div class="wt-result-title">準備完了！</div>';
+  h += '<div class="wt-emoji">' + SVG_KABUTORE + '</div>';
+  h += '<div class="wt-result-title" style="margin-top:4px;">準備完了！</div>';
   h += '<div class="wt-result-sub">' + goalMsg + '<br>バーチャル資金 <strong style="color:var(--cyan)">1,000,000円</strong> でスタートします</div>';
   h += '<div class="wt-budget-display"><div class="wt-budget-val">1,000,000円</div><div class="wt-budget-lbl">バーチャル開始資金</div></div>';
   h += '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;text-align:left">おすすめ銘柄（チェックを外すと追加しません）</div>';
