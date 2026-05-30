@@ -2946,12 +2946,12 @@ function openPracticeSetup(){
     '<input id="ps-date" type="date" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;margin-bottom:14px;outline:none;" />'+
     '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">初期資産</label>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">'+
-    '<button onclick="document.getElementById(\'ps-budget\').value=1000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">100万</button>'+
-    '<button onclick="document.getElementById(\'ps-budget\').value=3000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">300万</button>'+
-    '<button onclick="document.getElementById(\'ps-budget\').value=5000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">500万</button>'+
-    '<button onclick="document.getElementById(\'ps-budget\').value=10000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">1000万</button>'+
+    '<button onclick="_setPsBudget(1000000)" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">100万</button>'+
+    '<button onclick="_setPsBudget(3000000)" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">300万</button>'+
+    '<button onclick="_setPsBudget(5000000)" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">500万</button>'+
+    '<button onclick="_setPsBudget(10000000)" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">1000万</button>'+
     '</div>'+
-    '<input id="ps-budget" type="number" value="1000000" min="100000" step="100000" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:\'JetBrains Mono\',monospace;margin-bottom:20px;outline:none;" />'+
+    '<input id="ps-budget" type="text" inputmode="numeric" placeholder="1,000,000" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:\'JetBrains Mono\',monospace;margin-bottom:20px;outline:none;" oninput="_fmtPsBudget(this)" />'+
     '<div style="display:flex;gap:10px;">'+
     '<button onclick="document.getElementById(\'practiceSetupModal\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;">キャンセル</button>'+
     '<button id="ps-start-btn" onclick="startPractice()" style="flex:1;padding:12px;background:rgba(179,136,255,.2);border:1px solid rgba(179,136,255,.4);border-radius:10px;color:#b388ff;font-size:13px;font-weight:700;cursor:pointer;">スタート</button>'+
@@ -2963,12 +2963,16 @@ function openPracticeSetup(){
   dateEl.value=d.toISOString().slice(0,10);
   dateEl.max=new Date().toISOString().slice(0,10);
   dateEl.min='2019-01-01';
+  _setPsBudget(1000000);
 }
+function _setPsBudget(n){var el=document.getElementById('ps-budget');if(el)el.value=n.toLocaleString();}
+function _fmtPsBudget(el){var raw=el.value.replace(/,/g,'').replace(/[^\d]/g,'');var n=parseInt(raw)||0;el.value=n?n.toLocaleString():'';}
+function _parsePsBudget(){var el=document.getElementById('ps-budget');if(!el)return 1000000;return parseInt((el.value||'').replace(/,/g,''))||1000000;}
 
 async function startPractice(){
   var code=document.getElementById('ps-code').value;
   var startDate=document.getElementById('ps-date').value;
-  var budget=parseInt(document.getElementById('ps-budget').value)||1000000;
+  var budget=_parsePsBudget();
   if(!code||!startDate){toast('銘柄と開始日を設定してください',1);return;}
   var btn=document.getElementById('ps-start-btn');
   if(btn){btn.textContent='データ取得中...';btn.disabled=true;}
@@ -3103,10 +3107,11 @@ function drawPracticeChart(){
 function processPracticePendingOrders(){
   if(!practiceSession)return;
   var ps=practiceSession,day=ps.allData[ps.currentIdx];if(!day)return;
-  var toProc=ps.pendingOrders.filter(function(o){return o.status==='pending'&&o.date<=day.date;});
+  var toProc=ps.pendingOrders.filter(function(o){return o.status==='pending'&&o.date<day.date;});
+  var fillMsgs=[];
   toProc.forEach(function(o){
     var ep=null;
-    if(o.orderType==='market')ep=day.close;
+    if(o.orderType==='market')ep=day.open;
     else if(o.orderType==='limit'){
       if(o.type==='buy'&&day.low<=o.limitPrice)ep=o.limitPrice;
       if(o.type==='sell'&&day.high>=o.limitPrice)ep=o.limitPrice;
@@ -3115,7 +3120,7 @@ function processPracticePendingOrders(){
     if(o.type==='buy'){
       if(o.orderType==='market'){
         var cost=Math.round(ep)*o.qty;
-        if(ps.remain<cost){o.status='cancelled';toast('練習：資金不足で買い注文キャンセル',1);return;}
+        if(ps.remain<cost){o.status='cancelled';fillMsgs.push({msg:'資金不足で買い成行注文をキャンセルしました',err:1});return;}
         ps.remain-=cost;
       }else{
         ps.remain+=o.limitPrice*o.qty;
@@ -3123,16 +3128,19 @@ function processPracticePendingOrders(){
       }
       o.status='filled';
       ps.trades.push({id:Date.now()+Math.random(),code:o.code,type:'buy',date:day.date,price:Math.round(ep),qty:o.qty});
+      fillMsgs.push({msg:'🟢 買い['+(o.orderType==='market'?'成行':'指値')+'] 約定しました '+Math.round(ep).toLocaleString()+'円×'+o.qty+'株',err:0});
     }else{
-      var holdQ=_ptHoldQty();if(holdQ<o.qty){o.status='cancelled';return;}
+      var holdQ=_ptHoldQty();if(holdQ<o.qty){o.status='cancelled';fillMsgs.push({msg:'保有株数不足で売り注文をキャンセルしました',err:1});return;}
       var rem2=o.qty,rp=0;
       var buys=ps.trades.filter(function(t){return t.type==='buy'&&t.qty>0;}).sort(function(a,b){return a.date.localeCompare(b.date);});
       for(var k=0;k<buys.length&&rem2>0;k++){var b=buys[k];var use=Math.min(b.qty,rem2);rp+=(ep-b.price)*use;b.qty-=use;rem2-=use;}
       ps.trades=ps.trades.filter(function(t){return!(t.type==='buy'&&t.qty===0);});
       ps.realizedPnl+=rp;ps.remain+=Math.round(ep)*o.qty;o.status='filled';
       ps.trades.push({id:Date.now()+Math.random(),code:o.code,type:'sell',date:day.date,price:Math.round(ep),qty:o.qty});
+      fillMsgs.push({msg:'🔴 売り['+(o.orderType==='market'?'成行':'指値')+'] 約定しました '+Math.round(ep).toLocaleString()+'円×'+o.qty+'株 損益：'+(rp>=0?'+':'')+Math.round(rp).toLocaleString()+'円',err:0});
     }
   });
+  fillMsgs.forEach(function(m,i){setTimeout(function(){toast(m.msg,m.err,m.err?null:'#ffe066');},i*2500);});
 }
 
 function advancePracticeDay(){
