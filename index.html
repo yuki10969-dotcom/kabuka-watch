@@ -2164,8 +2164,76 @@ if('serviceWorker' in navigator){
       <div style="font-size:11px;color:var(--muted);">金額を変えるには「リセットする」をご利用ください</div>
     </div>
     <button onclick="openM();bnGo('market')" style="background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.2);border-radius:12px;padding:16px;text-align:left;color:var(--cyan);cursor:pointer;font-size:14px;display:flex;align-items:center;gap:12px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(0,229,255,.9)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>銘柄を追加する</button>
+    <button onclick="openPracticeSetup()" style="background:rgba(179,136,255,.07);border:1px solid rgba(179,136,255,.25);border-radius:12px;padding:16px;width:100%;text-align:left;color:#b388ff;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:12px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b388ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>過去データで練習</button>
     <button onclick="resetAll()" style="background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.25);border-radius:12px;padding:16px;width:100%;text-align:left;color:#ff4d6d;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:12px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff4d6d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>リセットする</button>
     <div style="text-align:center;font-size:11px;color:var(--muted);padding-top:4px;">データはこの端末に自動保存されます</div>
+  </div>
+</div>
+
+<!-- 練習モードパネル -->
+<div id="practicePanel" style="display:none;position:fixed;inset:0;z-index:700;background:#060a12;overflow-y:auto;-webkit-transform:translateZ(0);transform:translateZ(0);will-change:transform">
+  <div style="padding:16px 16px 100px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#b388ff;margin-bottom:4px;">PRACTICE MODE</div>
+        <div id="pt-stock-name" style="font-size:16px;font-weight:900;color:var(--text);"></div>
+        <div id="pt-date" style="font-size:13px;color:var(--cyan);font-family:'JetBrains Mono',monospace;margin-top:2px;"></div>
+      </div>
+      <button onclick="endPractice()" style="background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:10px;padding:8px 14px;color:#ff4d6d;font-size:13px;font-weight:700;cursor:pointer;">終了</button>
+    </div>
+    <div id="pt-account" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;"></div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;">
+      <div id="practiceChartBox" style="height:300px;"></div>
+    </div>
+    <div id="pt-ohlc" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px;"></div>
+    <div id="pt-position" style="display:none;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:10px;padding:12px 16px;margin-bottom:12px;"></div>
+    <div id="pt-pending" style="margin-bottom:12px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <button onclick="openPracticeTradeSheet()" style="padding:14px;border-radius:12px;font-size:14px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.1);color:var(--cyan);cursor:pointer;">取引する</button>
+      <button id="pt-next-btn" onclick="advancePracticeDay()" style="padding:14px;border-radius:12px;font-size:14px;font-weight:700;border:none;background:var(--cyan);color:#000;cursor:pointer;">次の日へ ▶</button>
+    </div>
+    <div id="pt-end-msg" style="display:none;text-align:center;color:var(--muted);font-size:13px;padding:8px;">データの最終日に到達しました</div>
+  </div>
+</div>
+
+<!-- 練習モード取引シート -->
+<div id="practiceTradeSheet" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center;">
+  <div style="background:#1a1f2e;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:520px;animation:slideUp .2s;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#b388ff;margin-bottom:2px;">PRACTICE</div>
+        <div id="pts-name" style="font-size:15px;font-weight:900;color:var(--text);"></div>
+        <div id="pts-price" style="font-size:13px;color:var(--cyan);font-family:'JetBrains Mono',monospace;margin-top:2px;"></div>
+      </div>
+      <button onclick="closePracticeTradeSheet()" style="background:transparent;border:none;color:var(--muted);font-size:22px;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <div id="pts-position" style="display:none;background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;margin-bottom:14px;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <button id="pts-buy-btn" onclick="selectPracticeTradeType('buy')" style="padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #00ff9d;background:rgba(0,255,157,.15);color:#00ff9d;cursor:pointer;">🟢 買う</button>
+      <button id="pts-sell-btn" onclick="selectPracticeTradeType('sell')" style="padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">🔴 売る</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+      <button id="pts-market-btn" onclick="selectPracticeOrderType('market')" style="padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.15);color:var(--cyan);cursor:pointer;">成行</button>
+      <button id="pts-limit-btn" onclick="selectPracticeOrderType('limit')" style="padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;">指値</button>
+    </div>
+    <div id="pts-limit-row" style="display:none;margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">指値価格（円）</label>
+      <input id="pts-limit-price" type="number" min="1" step="1" style="width:100%;box-sizing:border-box;text-align:right;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;" oninput="updatePracticeTotal()">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">株数（100株単位）<span id="pts-sell-hold-info" style="display:none;color:#ff4d6d;margin-left:8px;font-weight:700;"></span></label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="adjustPracticeQty(-100)" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+        <input id="pts-qty" type="number" value="100" min="100" step="100" style="flex:1;text-align:center;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace;" oninput="updatePracticeTotal()">
+        <button onclick="adjustPracticeQty(100)" style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">＋</button>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,.04);border-radius:10px;padding:12px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:var(--muted);">合計金額</span>
+      <span id="pts-total" style="font-size:18px;font-weight:900;font-family:'JetBrains Mono',monospace;color:var(--cyan);">---</span>
+    </div>
+    <div id="pts-order-note" style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px;"></div>
+    <button id="pts-submit" onclick="submitPracticeTradeSheet()" style="width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:900;border:none;background:#00ff9d;color:#000;cursor:pointer;">注文する</button>
   </div>
 </div>
 
@@ -2856,6 +2924,409 @@ document.getElementById('tradeSheet').addEventListener('click',function(e){if(e.
     }
   },{passive:false});
 })();
+</script>
+<script>
+// ==================== 練習モード ====================
+var practiceSession=null,lwCPractice=null,_ptsType='buy',_ptsOrderType='market',_ptsHoldQty=0;
+
+function openPracticeSetup(){
+  var old=document.getElementById('practiceSetupModal');if(old)old.remove();
+  var stocks=D.stocks||{};var codes=Object.keys(stocks);
+  if(!codes.length){toast('練習するには銘柄を登録してください',1);return;}
+  var options=codes.map(function(c){return '<option value="'+c+'">'+(stocks[c].name||c)+' ('+c+')</option>';}).join('');
+  var ov=document.createElement('div');
+  ov.id='practiceSetupModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML='<div style="background:#1a1f2e;border-radius:16px;padding:24px 20px;width:100%;max-width:360px;border:1px solid rgba(179,136,255,.3);max-height:90vh;overflow-y:auto;">'+
+    '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#b388ff;margin-bottom:8px;">PRACTICE MODE</div>'+
+    '<div style="font-size:16px;font-weight:900;color:var(--text);margin-bottom:20px;">過去データで練習</div>'+
+    '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">練習銘柄</label>'+
+    '<select id="ps-code" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;margin-bottom:14px;outline:none;-webkit-appearance:none;">'+options+'</select>'+
+    '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">開始日</label>'+
+    '<input id="ps-date" type="date" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;margin-bottom:14px;outline:none;" />'+
+    '<label style="font-size:11px;font-weight:700;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.5px;">初期資産</label>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">'+
+    '<button onclick="document.getElementById(\'ps-budget\').value=1000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">100万</button>'+
+    '<button onclick="document.getElementById(\'ps-budget\').value=3000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">300万</button>'+
+    '<button onclick="document.getElementById(\'ps-budget\').value=5000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">500万</button>'+
+    '<button onclick="document.getElementById(\'ps-budget\').value=10000000" style="padding:8px 0;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:8px;color:#e2e8f0;font-size:12px;font-weight:700;cursor:pointer;">1000万</button>'+
+    '</div>'+
+    '<input id="ps-budget" type="number" value="1000000" min="100000" step="100000" style="width:100%;background:#0d1524;border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:\'JetBrains Mono\',monospace;margin-bottom:20px;outline:none;" />'+
+    '<div style="display:flex;gap:10px;">'+
+    '<button onclick="document.getElementById(\'practiceSetupModal\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:#94a3b8;font-size:13px;font-weight:600;cursor:pointer;">キャンセル</button>'+
+    '<button id="ps-start-btn" onclick="startPractice()" style="flex:1;padding:12px;background:rgba(179,136,255,.2);border:1px solid rgba(179,136,255,.4);border-radius:10px;color:#b388ff;font-size:13px;font-weight:700;cursor:pointer;">スタート</button>'+
+    '</div></div>';
+  document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.remove();});
+  var d=new Date();d.setFullYear(d.getFullYear()-1);
+  var dateEl=document.getElementById('ps-date');
+  dateEl.value=d.toISOString().slice(0,10);
+  dateEl.max=new Date().toISOString().slice(0,10);
+  dateEl.min='2019-01-01';
+}
+
+async function startPractice(){
+  var code=document.getElementById('ps-code').value;
+  var startDate=document.getElementById('ps-date').value;
+  var budget=parseInt(document.getElementById('ps-budget').value)||1000000;
+  if(!code||!startDate){toast('銘柄と開始日を設定してください',1);return;}
+  var btn=document.getElementById('ps-start-btn');
+  if(btn){btn.textContent='データ取得中...';btn.disabled=true;}
+  try{
+    var res=await fetch('/api/stock?code='+encodeURIComponent(code)+'&interval=1d&range=5y');
+    var data=await res.json();
+    var ch=data&&data.chart&&data.chart.result&&data.chart.result[0];
+    if(!ch){toast('データの取得に失敗しました',1);if(btn){btn.textContent='スタート';btn.disabled=false;}return;}
+    var q=ch.indicators.quote[0],ts=ch.timestamp;
+    var allData=[],seen={};
+    for(var i=0;i<ts.length;i++){
+      if(q.open[i]==null||q.high[i]==null||q.low[i]==null||q.close[i]==null)continue;
+      var ds=toDS(ts[i]);if(seen[ds])continue;seen[ds]=true;
+      allData.push({date:ds,open:Math.round(q.open[i]),high:Math.round(q.high[i]),low:Math.round(q.low[i]),close:Math.round(q.close[i])});
+    }
+    allData.sort(function(a,b){return a.date.localeCompare(b.date);});
+    var startIdx=allData.findIndex(function(d){return d.date>=startDate;});
+    if(startIdx<0){toast('指定期間のデータがありません',1);if(btn){btn.textContent='スタート';btn.disabled=false;}return;}
+    var stockName=(D.stocks[code]&&D.stocks[code].name)||code;
+    practiceSession={code:code,stockName:stockName,allData:allData,currentIdx:startIdx,budget:budget,remain:budget,trades:[],pendingOrders:[],realizedPnl:0};
+    document.getElementById('practiceSetupModal').remove();
+    document.getElementById('practicePanel').style.display='block';
+    document.getElementById('bnav').style.display='none';
+    document.body.style.overflow='hidden';
+    renderPracticePanel();
+  }catch(e){toast('データの取得に失敗しました',1);if(btn){btn.textContent='スタート';btn.disabled=false;}console.error('practice start:',e);}
+}
+
+function _ptHoldQty(){
+  if(!practiceSession)return 0;
+  return practiceSession.trades.filter(function(t){return t.type==='buy';}).reduce(function(a,t){return a+t.qty;},0);
+}
+function _ptHoldCost(){
+  if(!practiceSession)return 0;
+  return practiceSession.trades.filter(function(t){return t.type==='buy';}).reduce(function(a,t){return a+t.price*t.qty;},0);
+}
+
+function renderPracticePanel(){
+  if(!practiceSession)return;
+  var ps=practiceSession,idx=ps.currentIdx,day=ps.allData[idx];
+  if(!day)return;
+  var dt=new Date(day.date+'T00:00:00Z');
+  var wdays=['日','月','火','水','木','金','土'];
+  document.getElementById('pt-stock-name').textContent=ps.stockName+' ('+ps.code+')';
+  document.getElementById('pt-date').textContent=dt.getUTCFullYear()+'年'+(dt.getUTCMonth()+1)+'月'+dt.getUTCDate()+'日('+wdays[dt.getUTCDay()]+')';
+  var holdQty=_ptHoldQty(),holdCost=_ptHoldCost();
+  var unrealPnl=holdQty>0?(day.close-holdCost/holdQty)*holdQty:0;
+  var totalAsset=Math.round(ps.remain+holdCost+unrealPnl);
+  var totalPnl=totalAsset-ps.budget;
+  document.getElementById('pt-account').innerHTML=
+    '<div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">残り資金</div><div style="font-size:13px;font-weight:700;font-family:\'JetBrains Mono\',monospace;color:var(--cyan);">'+Math.round(ps.remain).toLocaleString()+'円</div></div>'+
+    '<div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">総資産</div><div style="font-size:13px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+totalAsset.toLocaleString()+'円</div></div>'+
+    '<div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">損益</div><div style="font-size:13px;font-weight:700;font-family:\'JetBrains Mono\',monospace;color:'+(totalPnl>=0?'var(--green)':'var(--red)')+';">'+(totalPnl>=0?'+':'')+totalPnl.toLocaleString()+'円</div></div>';
+  var prevClose=idx>0?ps.allData[idx-1].close:day.open;
+  var chg=day.close-prevClose,chgPct=((chg/prevClose)*100).toFixed(2),chgC=chg>=0?'var(--green)':'var(--red)';
+  document.getElementById('pt-ohlc').innerHTML=
+    _ptOhlcBox('始値',day.open,null)+_ptOhlcBox('高値',day.high,'var(--green)')+_ptOhlcBox('安値',day.low,'var(--red)')+_ptOhlcBox('終値',day.close,chgC)+_ptOhlcBox('前比',(chg>=0?'+':'')+chgPct+'%',chgC);
+  if(holdQty>0){
+    var avg=holdCost/holdQty,pnlD=Math.round(unrealPnl),pnlC=pnlD>=0?'var(--green)':'var(--red)';
+    document.getElementById('pt-position').style.display='block';
+    document.getElementById('pt-position').innerHTML='<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">保有ポジション</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">'+
+      '<div style="text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">株数</div><div style="font-size:14px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+holdQty.toLocaleString()+'株</div></div>'+
+      '<div style="text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">平均単価</div><div style="font-size:14px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+Math.round(avg).toLocaleString()+'円</div></div>'+
+      '<div style="text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:2px;">評価損益</div><div style="font-size:14px;font-weight:700;font-family:\'JetBrains Mono\',monospace;color:'+pnlC+';">'+(pnlD>=0?'+':'')+pnlD.toLocaleString()+'円</div></div>'+
+      '</div>';
+  }else{document.getElementById('pt-position').style.display='none';}
+  var pending=ps.pendingOrders.filter(function(o){return o.status==='pending';});
+  if(pending.length){
+    var ph='<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:6px;">注文中</div>';
+    pending.forEach(function(o){
+      var tl=o.type==='buy'?'🟢 買い':'🔴 売り';
+      var ol=o.orderType==='limit'?'指値 '+o.limitPrice.toLocaleString()+'円':'成行';
+      ph+='<div style="background:rgba(255,224,102,.06);border:1px solid rgba(255,224,102,.2);border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'+
+        '<span style="font-size:13px;">'+tl+' '+ol+' × '+o.qty.toLocaleString()+'株</span>'+
+        '<button onclick="cancelPracticeOrder(\''+o.id+'\')" style="background:transparent;border:none;color:var(--red);font-size:12px;cursor:pointer;padding:2px 8px;">キャンセル</button></div>';
+    });
+    document.getElementById('pt-pending').innerHTML=ph;
+  }else{document.getElementById('pt-pending').innerHTML='';}
+  var nextBtn=document.getElementById('pt-next-btn'),endMsg=document.getElementById('pt-end-msg');
+  if(idx>=ps.allData.length-1){nextBtn.style.display='none';endMsg.style.display='block';}
+  else{nextBtn.style.display='';endMsg.style.display='none';}
+  drawPracticeChart();
+}
+
+function _ptOhlcBox(label,val,color){
+  var dv=typeof val==='number'?val.toLocaleString()+'円':val;
+  return '<div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;">'+
+    '<div style="font-size:10px;color:var(--muted);margin-bottom:3px;">'+label+'</div>'+
+    '<div style="font-size:12px;font-weight:700;font-family:\'JetBrains Mono\',monospace;'+(color?'color:'+color+';':'')+'">' + dv + '</div></div>';
+}
+
+function drawPracticeChart(){
+  if(!practiceSession)return;
+  var ps=practiceSession,box=document.getElementById('practiceChartBox');
+  if(!box)return;
+  if(lwCPractice){try{lwCPractice.remove();}catch(e){}lwCPractice=null;}
+  box.innerHTML='';
+  var dispData=ps.allData.slice(0,ps.currentIdx+1);
+  if(!dispData.length)return;
+  lwCPractice=LightweightCharts.createChart(box,{
+    width:box.offsetWidth,height:300,
+    layout:{background:{color:'#060a12'},textColor:'#7a9ab8'},
+    grid:{vertLines:{color:'rgba(28,46,72,.5)'},horzLines:{color:'rgba(28,46,72,.5)'}},
+    crosshair:{mode:LightweightCharts.CrosshairMode.Normal},
+    rightPriceScale:{borderColor:'#1c2e48'},
+    timeScale:{borderColor:'#1c2e48',barSpacing:9},
+    localization:{
+      priceFormatter:function(p){return Math.round(p).toLocaleString()+'円';},
+      timeFormatter:function(t){
+        var wd=['日','月','火','水','木','金','土'];
+        if(typeof t==='string'){var p=t.split('-');var dt2=new Date(p[0]+'-'+p[1]+'-'+p[2]+'T00:00:00Z');return p[0]+'/'+(parseInt(p[1])<10?'0':'')+p[1]+'/'+(parseInt(p[2])<10?'0':'')+p[2]+'('+wd[dt2.getUTCDay()]+')';}
+        var d2=new Date(t*1000);return d2.getUTCFullYear()+'/'+(d2.getUTCMonth()+1)+'/'+d2.getUTCDate()+'('+wd[d2.getUTCDay()]+')';
+      }
+    }
+  });
+  var cs=lwCPractice.addCandlestickSeries({upColor:'#00ff9d',downColor:'#ff4d6d',borderUpColor:'#00ff9d',borderDownColor:'#ff4d6d',wickUpColor:'#00ff9d',wickDownColor:'#ff4d6d'});
+  cs.setData(dispData.map(function(d){return{time:d.date,open:d.open,high:d.high,low:d.low,close:d.close};}));
+  var cls=dispData.map(function(d){return d.close;});
+  [5,25].forEach(function(n,idx){
+    var ms=lwCPractice.addLineSeries({color:idx===0?'rgba(0,255,157,.8)':'rgba(179,136,255,.8)',lineWidth:1.5,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    ms.setData(dispData.map(function(d,i){if(i<n-1)return null;var sv=0;for(var j=i-(n-1);j<=i;j++)sv+=cls[j];return{time:d.date,value:sv/n};}).filter(Boolean));
+  });
+  var markers=[];
+  ps.trades.forEach(function(t){
+    markers.push({time:t.date,position:t.type==='buy'?'belowBar':'aboveBar',color:t.type==='buy'?'#00ff9d':'#ff4d6d',shape:t.type==='buy'?'arrowUp':'arrowDown',text:(t.type==='buy'?'買':'売')+Math.round(t.price).toLocaleString()});
+  });
+  if(markers.length)cs.setMarkers(markers);
+  lwCPractice.timeScale().scrollToRealTime();
+}
+
+function processPracticePendingOrders(){
+  if(!practiceSession)return;
+  var ps=practiceSession,day=ps.allData[ps.currentIdx];if(!day)return;
+  var toProc=ps.pendingOrders.filter(function(o){return o.status==='pending'&&o.date<=day.date;});
+  toProc.forEach(function(o){
+    var ep=null;
+    if(o.orderType==='market')ep=day.close;
+    else if(o.orderType==='limit'){
+      if(o.type==='buy'&&day.low<=o.limitPrice)ep=o.limitPrice;
+      if(o.type==='sell'&&day.high>=o.limitPrice)ep=o.limitPrice;
+    }
+    if(ep==null)return;
+    if(o.type==='buy'){
+      if(o.orderType==='market'){
+        var cost=Math.round(ep)*o.qty;
+        if(ps.remain<cost){o.status='cancelled';toast('練習：資金不足で買い注文キャンセル',1);return;}
+        ps.remain-=cost;
+      }else{
+        ps.remain+=o.limitPrice*o.qty;
+        ps.remain-=Math.round(ep)*o.qty;
+      }
+      o.status='filled';
+      ps.trades.push({id:Date.now()+Math.random(),code:o.code,type:'buy',date:day.date,price:Math.round(ep),qty:o.qty});
+    }else{
+      var holdQ=_ptHoldQty();if(holdQ<o.qty){o.status='cancelled';return;}
+      var rem2=o.qty,rp=0;
+      var buys=ps.trades.filter(function(t){return t.type==='buy'&&t.qty>0;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+      for(var k=0;k<buys.length&&rem2>0;k++){var b=buys[k];var use=Math.min(b.qty,rem2);rp+=(ep-b.price)*use;b.qty-=use;rem2-=use;}
+      ps.trades=ps.trades.filter(function(t){return!(t.type==='buy'&&t.qty===0);});
+      ps.realizedPnl+=rp;ps.remain+=Math.round(ep)*o.qty;o.status='filled';
+      ps.trades.push({id:Date.now()+Math.random(),code:o.code,type:'sell',date:day.date,price:Math.round(ep),qty:o.qty});
+    }
+  });
+}
+
+function advancePracticeDay(){
+  if(!practiceSession)return;
+  var ps=practiceSession;
+  ps.currentIdx++;
+  if(ps.currentIdx>=ps.allData.length)ps.currentIdx=ps.allData.length-1;
+  processPracticePendingOrders();
+  renderPracticePanel();
+}
+
+function openPracticeTradeSheet(){
+  if(!practiceSession)return;
+  var ps=practiceSession,day=ps.allData[ps.currentIdx];
+  document.getElementById('pts-name').textContent=ps.stockName+' ('+ps.code+')';
+  document.getElementById('pts-price').textContent='終値：'+day.close.toLocaleString()+'円';
+  var holdQty=_ptHoldQty();_ptsHoldQty=holdQty;
+  if(holdQty>0){
+    var holdCost=_ptHoldCost(),avg=holdCost/holdQty,pnl=Math.round((day.close-avg)*holdQty);
+    document.getElementById('pts-position').style.display='block';
+    document.getElementById('pts-position').innerHTML='<div style="font-size:10px;font-weight:700;color:var(--muted);margin-bottom:6px;">保有中</div>'+
+      '<div style="display:flex;justify-content:space-between;"><span style="font-size:13px;">'+holdQty.toLocaleString()+'株 / 平均'+Math.round(avg).toLocaleString()+'円</span>'+
+      '<span style="font-size:13px;color:'+(pnl>=0?'var(--green)':'var(--red)')+';">'+(pnl>=0?'+':'')+pnl.toLocaleString()+'円</span></div>';
+  }else{document.getElementById('pts-position').style.display='none';}
+  document.getElementById('pts-qty').value=100;
+  selectPracticeTradeType('buy');
+  selectPracticeOrderType('market');
+  document.getElementById('pts-limit-price').value=day.close;
+  updatePracticeTotal();
+  document.getElementById('practiceTradeSheet').style.display='flex';
+}
+
+function closePracticeTradeSheet(){document.getElementById('practiceTradeSheet').style.display='none';}
+
+function selectPracticeTradeType(type){
+  _ptsType=type;
+  var bb=document.getElementById('pts-buy-btn'),sb=document.getElementById('pts-sell-btn'),sub=document.getElementById('pts-submit'),hi=document.getElementById('pts-sell-hold-info');
+  if(type==='buy'){
+    bb.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #00ff9d;background:rgba(0,255,157,.15);color:#00ff9d;cursor:pointer;';
+    sb.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
+    sub.style.background='#00ff9d';sub.style.color='#000';sub.textContent='買い注文する';hi.style.display='none';
+  }else{
+    sb.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid #ff4d6d;background:rgba(255,77,109,.15);color:#ff4d6d;cursor:pointer;';
+    bb.style.cssText='padding:12px;border-radius:10px;font-size:14px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
+    sub.style.background='#ff4d6d';sub.style.color='#fff';sub.textContent='売り注文する';
+    hi.textContent='保有：'+(_ptsHoldQty||0).toLocaleString()+'株';hi.style.display='inline';
+  }
+  updatePracticeTotal();
+}
+
+function selectPracticeOrderType(type){
+  _ptsOrderType=type;
+  var mb=document.getElementById('pts-market-btn'),lb=document.getElementById('pts-limit-btn'),lr=document.getElementById('pts-limit-row'),note=document.getElementById('pts-order-note');
+  if(type==='market'){
+    mb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.15);color:var(--cyan);cursor:pointer;';
+    lb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
+    lr.style.display='none';note.textContent='成行：本日の終値で即約定';
+  }else{
+    lb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--cyan);background:rgba(0,229,255,.15);color:var(--cyan);cursor:pointer;';
+    mb.style.cssText='padding:10px;border-radius:10px;font-size:13px;font-weight:700;border:2px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;';
+    lr.style.display='block';note.textContent='指値：翌日以降に条件を満たせば約定';
+  }
+  updatePracticeTotal();
+}
+
+function adjustPracticeQty(delta){var i=document.getElementById('pts-qty');var v=(parseInt(i.value)||0)+delta;if(v<100)v=100;i.value=v;updatePracticeTotal();}
+
+function updatePracticeTotal(){
+  if(!practiceSession)return;
+  var day=practiceSession.allData[practiceSession.currentIdx];
+  var p=_ptsOrderType==='limit'?(parseFloat(document.getElementById('pts-limit-price').value)||null):(day?day.close:null);
+  var q=parseInt(document.getElementById('pts-qty').value)||0;
+  document.getElementById('pts-total').textContent=p&&q?Math.round(p*q).toLocaleString()+'円':'---';
+}
+
+function submitPracticeTradeSheet(){
+  if(!practiceSession)return;
+  var ps=practiceSession,day=ps.allData[ps.currentIdx];if(!day)return;
+  var qty=parseInt(document.getElementById('pts-qty').value)||0;
+  if(qty<100){toast('株数は100株以上で入力してください',1);return;}
+  var isLimit=_ptsOrderType==='limit',limitPrice=null;
+  if(isLimit){
+    limitPrice=Math.round(parseFloat(document.getElementById('pts-limit-price').value)||0);
+    if(!limitPrice||limitPrice<=0){toast('指値価格を入力してください',1);return;}
+  }
+  if(_ptsType==='buy'){
+    var costPrice=isLimit?limitPrice:day.close;
+    var cost=costPrice*qty;
+    if(ps.remain<cost){toast('資金が不足しています',1);return;}
+    if(isLimit){
+      ps.remain-=cost;
+      ps.pendingOrders.push({id:Date.now()+Math.random(),code:ps.code,type:'buy',orderType:'limit',limitPrice:limitPrice,qty:qty,date:day.date,status:'pending'});
+      closePracticeTradeSheet();renderPracticePanel();
+      toast('🟢 指値買い注文（翌日以降に約定）');
+    }else{
+      ps.remain-=cost;
+      ps.trades.push({id:Date.now()+Math.random(),code:ps.code,type:'buy',date:day.date,price:day.close,qty:qty});
+      closePracticeTradeSheet();renderPracticePanel();
+      toast('🟢 買い[成行]約定 '+day.close.toLocaleString()+'円×'+qty+'株');
+    }
+  }else{
+    var holdQty=_ptHoldQty();
+    if(holdQty<=0){toast('この銘柄の買いポジションがありません',1);return;}
+    if(qty>holdQty){toast('保有株数（'+holdQty.toLocaleString()+'株）を超えて売ることはできません',1);return;}
+    if(isLimit){
+      ps.pendingOrders.push({id:Date.now()+Math.random(),code:ps.code,type:'sell',orderType:'limit',limitPrice:limitPrice,qty:qty,date:day.date,status:'pending'});
+      closePracticeTradeSheet();renderPracticePanel();
+      toast('🔴 指値売り注文（翌日以降に約定）');
+    }else{
+      var rem2=qty,rp=0;
+      var buys=ps.trades.filter(function(t){return t.type==='buy'&&t.qty>0;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+      for(var i=0;i<buys.length&&rem2>0;i++){var b=buys[i];var use=Math.min(b.qty,rem2);rp+=(day.close-b.price)*use;b.qty-=use;rem2-=use;}
+      ps.trades=ps.trades.filter(function(t){return!(t.type==='buy'&&t.qty===0);});
+      ps.realizedPnl+=rp;ps.remain+=day.close*qty;
+      ps.trades.push({id:Date.now()+Math.random(),code:ps.code,type:'sell',date:day.date,price:day.close,qty:qty});
+      closePracticeTradeSheet();renderPracticePanel();
+      toast('🔴 売り[成行]約定 '+day.close.toLocaleString()+'円×'+qty+'株 損益：'+(rp>=0?'+':'')+Math.round(rp).toLocaleString()+'円');
+    }
+  }
+}
+
+function cancelPracticeOrder(id){
+  if(!practiceSession)return;
+  var ps=practiceSession;
+  var o=ps.pendingOrders.find(function(o){return String(o.id)===String(id);});
+  if(!o)return;
+  if(o.orderType==='limit'&&o.type==='buy')ps.remain+=o.limitPrice*o.qty;
+  o.status='cancelled';
+  renderPracticePanel();
+  toast('注文をキャンセルしました');
+}
+
+function endPractice(){
+  if(!practiceSession){
+    document.getElementById('practicePanel').style.display='none';
+    document.getElementById('bnav').style.display='';
+    document.body.style.overflow='';
+    return;
+  }
+  showPracticeSummary();
+}
+
+function showPracticeSummary(){
+  var ps=practiceSession,lastDay=ps.allData[ps.currentIdx];
+  var holdQty=_ptHoldQty(),holdCost=_ptHoldCost();
+  var unrealPnl=holdQty>0?(lastDay.close-holdCost/holdQty)*holdQty:0;
+  var finalAsset=Math.round(ps.remain+holdCost+unrealPnl);
+  var totalPnl=finalAsset-ps.budget;
+  var pnlC=totalPnl>=0?'#00ff9d':'#ff4d6d';
+  var endDate=lastDay?lastDay.date:'---';
+  var allTrades=ps.trades.slice().sort(function(a,b){return a.date.localeCompare(b.date);});
+  var histRows=allTrades.map(function(t){
+    return '<tr>'+
+      '<td style="padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;color:var(--muted);">'+t.date+'</td>'+
+      '<td style="padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;font-weight:700;color:'+(t.type==='buy'?'var(--green)':'var(--red)')+';">'+(t.type==='buy'?'買い':'売り')+'</td>'+
+      '<td style="padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;text-align:right;font-family:\'JetBrains Mono\',monospace;">'+t.price.toLocaleString()+'円</td>'+
+      '<td style="padding:7px 8px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12px;text-align:right;font-family:\'JetBrains Mono\',monospace;">'+t.qty.toLocaleString()+'株</td>'+
+      '</tr>';
+  }).join('');
+  var ov=document.createElement('div');
+  ov.id='practiceSummaryModal';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1100;overflow-y:auto;padding:20px;display:flex;align-items:flex-start;justify-content:center;padding-top:40px;';
+  ov.innerHTML='<div style="background:#1a1f2e;border-radius:16px;padding:24px 20px;width:100%;max-width:480px;border:1px solid rgba(179,136,255,.3);">'+
+    '<div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#b388ff;margin-bottom:8px;">PRACTICE RESULT</div>'+
+    '<div style="font-size:18px;font-weight:900;color:var(--text);margin-bottom:4px;">'+ps.stockName+' 練習結果</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-bottom:20px;">'+endDate+' 終了</div>'+
+    '<div style="background:rgba(0,0,0,.3);border-radius:12px;padding:16px;margin-bottom:16px;text-align:center;">'+
+    '<div style="font-size:11px;color:var(--muted);margin-bottom:6px;">最終損益</div>'+
+    '<div style="font-size:32px;font-weight:900;font-family:\'JetBrains Mono\',monospace;color:'+pnlC+';">'+(totalPnl>=0?'+':'')+totalPnl.toLocaleString()+'円</div>'+
+    '<div style="font-size:12px;color:var(--muted);margin-top:4px;">'+(totalPnl/ps.budget*100).toFixed(2)+'% ('+ps.budget.toLocaleString()+'円 → '+finalAsset.toLocaleString()+'円)</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">'+
+    '<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">確定損益</div><div style="font-size:13px;font-weight:700;color:'+(ps.realizedPnl>=0?'var(--green)':'var(--red)')+';">'+(ps.realizedPnl>=0?'+':'')+Math.round(ps.realizedPnl).toLocaleString()+'円</div></div>'+
+    '<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">残り資金</div><div style="font-size:13px;font-weight:700;font-family:\'JetBrains Mono\',monospace;">'+Math.round(ps.remain).toLocaleString()+'円</div></div>'+
+    '<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:10px;text-align:center;"><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">取引回数</div><div style="font-size:13px;font-weight:700;">'+allTrades.length+'回</div></div>'+
+    '</div>'+
+    (histRows?'<div style="margin-bottom:16px;"><div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-bottom:8px;">取引履歴</div><div style="overflow-x:auto;max-height:220px;overflow-y:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th style="padding:7px 8px;text-align:left;font-size:11px;color:var(--muted);position:sticky;top:0;background:#1a1f2e;">日付</th><th style="padding:7px 8px;text-align:left;font-size:11px;color:var(--muted);position:sticky;top:0;background:#1a1f2e;">種別</th><th style="padding:7px 8px;text-align:right;font-size:11px;color:var(--muted);position:sticky;top:0;background:#1a1f2e;">価格</th><th style="padding:7px 8px;text-align:right;font-size:11px;color:var(--muted);position:sticky;top:0;background:#1a1f2e;">株数</th></tr></thead><tbody>'+histRows+'</tbody></table></div></div>':'<div style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:16px;">取引なし</div>')+
+    '<button onclick="closePracticeSummary()" style="width:100%;padding:14px;border-radius:12px;font-size:15px;font-weight:900;border:none;background:var(--cyan);color:#000;cursor:pointer;">リアルタイムモードに戻る</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+function closePracticeSummary(){
+  var el=document.getElementById('practiceSummaryModal');if(el)el.remove();
+  if(lwCPractice){try{lwCPractice.remove();}catch(e){}lwCPractice=null;}
+  practiceSession=null;
+  document.getElementById('practicePanel').style.display='none';
+  document.getElementById('bnav').style.display='';
+  document.body.style.overflow='';
+  bnGo('market');
+}
+
+document.getElementById('practiceTradeSheet').addEventListener('click',function(e){if(e.target===this)closePracticeTradeSheet();});
+// ==================== 練習モード END ====================
 </script>
 </body>
 </html>
